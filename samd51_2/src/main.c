@@ -45,10 +45,10 @@ int main()
 
 
 	while(1) {
-		pPort->Group[0].OUTCLR.reg = (1 << 23);
-		for(int i = 0; i < 10000000; i++);
+		pPort->Group[0].OUTCLR.reg |= (1 << 23);
+		for(int i = 0; i < 1000000; i++);
 		pPort->Group[0].OUTSET.reg |= (1 << 23);
-		for(int i = 0; i < 10000000; i++);
+		for(int i = 0; i < 1000000; i++);
 
 
 
