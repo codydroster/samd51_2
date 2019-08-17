@@ -17,8 +17,11 @@ Oscctrl *pOsc = OSCCTRL;
 
 
 
-//Sercom usart0 = SERCOM0_USART;
-;
+//DPLL0 alias
+
+OscctrlDpll *dpll0 = &OSCCTRL->Dpll[0];
+
+
 uint8_t init()
 {
 
@@ -46,9 +49,14 @@ uint8_t init()
 //wait on MCLK.CKRDY
 	while(!pMclk->INTFLAG.bit.CKRDY);
 
-	Osc32_init();
+	osc32_init();
 
-	gen2_init();
+//	gen2_init();
+
+	osc_init();
+
+//	pGclk->GENCTRL[0].bit.SRC = 7;
+//	while(pGclk->SYNCBUSY.bit.GENCTRL0);
 
 return 0;
 
@@ -56,7 +64,7 @@ return 0;
 
 
 
-uint8_t Osc32_init()
+uint8_t osc32_init()
 
 {
 	pOsc32->XOSC32K.bit.ENABLE |= 1;
@@ -73,13 +81,45 @@ return 0;
 
 
 
+uint8_t osc_init()
+{
+
+	pOsc->Dpll[0].DPLLCTRLA.bit.ENABLE = 1;
+	while(pOsc->Dpll[0].DPLLSYNCBUSY.bit.ENABLE);
+	pOsc->Dpll[0].DPLLCTRLA.bit.ONDEMAND = 0;
+
+	pOsc->Dpll[0].DPLLRATIO.bit.LDR = 3499;
+
+
+
+
+	//wait until frequency lock
+//	while(!dpll0->DPLLSTATUS.bit.LOCK);
+
+
+
+
+
+
+
+	return 0;
+}
+
+
 uint8_t gen2_init()
 {
 	//OSC32K SRC
-	pGclk->GENCTRL[2].bit.GENEN = 1;
-	pGclk->GENCTRL[2].bit.DIV = 0;
-	pGclk->GENCTRL[2].bit.SRC |= 5;
+	pGclk->GENCTRL[1].bit.GENEN = 1;
+	pGclk->GENCTRL[1].bit.DIV = 0;
+	pGclk->GENCTRL[1].bit.SRC |= 5;
 
+//DPLL PERIPH
+
+	pGclk->PCHCTRL[1].bit.GEN = 1;
+	pGclk->PCHCTRL[1].bit.CHEN = 1;
+
+	pGclk->PCHCTRL[3].bit.GEN = 1;
+	pGclk->PCHCTRL[3].bit.CHEN = 1;
 
 
 
