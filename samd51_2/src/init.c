@@ -12,6 +12,8 @@ Mclk *pMclk = MCLK;
 Gclk *pGclk = GCLK;
 Osc32kctrl *pOsc32 = OSC32KCTRL;
 Oscctrl *pOsc = OSCCTRL;
+Sercom *pSercom0 = SERCOM0;
+Dmac *pDmac = DMAC;
 
 
 
@@ -125,6 +127,7 @@ uint8_t gen2_init()
 
 	return 0;
 }
+
 
 
 

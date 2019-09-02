@@ -17,11 +17,11 @@ uint8_t osc_init();
 
 
 
-SercomUsart *serUsart;
 
-Sercom *usart0;
 
-Sercom *sercom0;
+Dmac *pDmac;
+
+Sercom *pSercom0;
 
 Gclk *pGclk;
 
