@@ -32,16 +32,18 @@
 #include "samd51j19a.h"
 #include "main.h"
 #include "init.h"
+#include "serial.h"
 
 
 int main()
 {
 	init();
+	serial0_init();
 	while(!(pMclk->INTFLAG.reg));
 
+
+
 	pPort->Group[0].OUTSET.reg |= (1 << 23);
-
-
 
 
 	while(1) {
@@ -49,6 +51,12 @@ int main()
 		for(int i = 0; i < 1000000; i++);
 		pPort->Group[0].OUTSET.reg |= (1 << 23);
 		for(int i = 0; i < 1000000; i++);
+
+
+		pSercom0->USART.DATA.reg = 0x42;
+		while(!pSercom0->USART.INTFLAG.bit.TXC);
+
+
 
 
 

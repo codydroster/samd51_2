@@ -37,9 +37,10 @@ uint8_t init()
 	pGclk->GENCTRL[0].bit.OE |= 1;
 
 	pPort->Group[0].DIRSET.reg |= (1 << 23);
+	pPort->Group[0].DIRSET.bit.DIRSET = 14;
 	pPort->Group[0].PINCFG[14].bit.PMUXEN |= 1;
 	pPort->Group[0].PMUX[7].bit.PMUXE = 0xC;
-
+	pPort->Group[0].PINCFG[14].bit.DRVSTR = 1;
 
 
 
