@@ -42,15 +42,15 @@ uint8_t serial0_init()
 
 
 	//pin setup
-	pPort->Group[0].PMUX[2].bit.PMUXE = 3;
-	pPort->Group[0].PMUX[2].bit.PMUXO = 3;
-	pPort->Group[0].PINCFG[4].bit.DRVSTR = 1;
-	pPort->Group[0].PINCFG[5].bit.DRVSTR = 1;
+	PORT->Group[0].PMUX[2].bit.PMUXE = 3;
+	PORT->Group[0].PMUX[2].bit.PMUXO = 3;
+	PORT->Group[0].PINCFG[4].bit.DRVSTR = 1;
+	PORT->Group[0].PINCFG[5].bit.DRVSTR = 1;
 
-	pPort->Group[0].PINCFG[4].bit.PMUXEN = 1;
-	pPort->Group[0].PINCFG[5].bit.PMUXEN = 1;
-	pPort->Group[0].DIRSET.bit.DIRSET = 4;
-	pPort->Group[0].DIRSET.bit.DIRSET = 5;
+	PORT->Group[0].PINCFG[4].bit.PMUXEN = 1;
+	PORT->Group[0].PINCFG[5].bit.PMUXEN = 1;
+	PORT->Group[0].DIRSET.bit.DIRSET = 4;
+	PORT->Group[0].DIRSET.bit.DIRSET = 5;
 
 
 
@@ -61,8 +61,7 @@ uint8_t serial0_init()
 
 
 	//6MHZ clk configured
-	pUsart0->BAUD.reg = 65326;	//9600 baud
-//	pUsart0->BAUD.bit.BAUD = 45403;	//115200 baud
+	pUsart0->BAUD.reg = 63019;	//115200 baud
 
 	pUsart0->CTRLA.bit.ENABLE = 1;	//enable
 

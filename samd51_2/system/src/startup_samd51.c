@@ -545,5 +545,8 @@ void Reset_Handler(void)
 void Dummy_Handler(void)
 {
         while (1) {
+        	PORT->Group[0].DIRSET.reg |= (1 << 23);
+        	PORT->Group[0].DIRSET.bit.DIRSET = 14;
+        	PORT->Group[0].OUTSET.reg |= (1 << 23);
         }
 }
