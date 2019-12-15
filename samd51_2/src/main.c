@@ -41,8 +41,7 @@ int main()
 {
 	init();
 
-	while(!(pMclk->INTFLAG.reg));
-
+	while(!(MCLK->INTFLAG.reg));
 
 
 
@@ -50,12 +49,7 @@ int main()
 
 	while(1) {
 
-
-//		pSercom0->USART.DATA.reg = 0x42;
-//		while(!pSercom0->USART.INTFLAG.bit.TXC);
-
-
-
+//		SERCOM0->USART.DATA.reg = 0x42;
 
 
 	}

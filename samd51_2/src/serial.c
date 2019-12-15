@@ -6,67 +6,75 @@
  */
 #include "serial.h"
 
-SercomUsart *pUsart0 = &SERCOM0->USART;
+uint8_t uart_transmit_xbee[12] = {0x42,0x42,0x42,0x32,0x42,0x42,0x42,0x32,0x42,0x42,0x42,0x32,0x42,0x42,0x42};
+
 
 uint8_t serial0_init()
 {
 
-//	pUsart0->CTRLA.bit.ENABLE = 1;	//enable
-
-//	while(pUsart0->SYNCBUSY.bit.ENABLE);
 
 	//clk setup
-	pMclk->APBAMASK.bit.SERCOM0_ = 1;
+	MCLK->APBAMASK.bit.SERCOM0_ = 1;
 
-	pGclk->PCHCTRL[7].bit.GEN = 0;	//SERCOM0 clk gen 0
-	pGclk->PCHCTRL[7].bit.CHEN = 1;	//enable SERCOM0
+	GCLK->PCHCTRL[7].bit.GEN = 0;	//SERCOM0 clk gen 0
+	GCLK->PCHCTRL[7].bit.CHEN = 1;	//enable SERCOM0
 
 
 
 	//SERCOM init
-//	pSercom0->USART.CTRLA.bit.ENABLE = 1;
-
-	pUsart0->CTRLA.bit.DORD = 0;	//MSB first
-	pUsart0->CTRLA.bit.CMODE = 0;	//Async
-	pUsart0->CTRLA.bit.FORM = 0;	//USART frame
-	pUsart0->CTRLA.bit.RXPO = 1;	//PAD[1] - A5 (A1 - board)
-	pUsart0->CTRLA.bit.TXPO = 0;	//PAD[0] - A4 (A4 - board)
-	pUsart0->CTRLA.bit.SAMPR = 0;	//16x oversampling
-	pUsart0->CTRLA.bit.MODE = 1;	//internal clk
 
 
-	pUsart0->CTRLB.bit.RXEN = 1;	//RX enable
-	pUsart0->CTRLB.bit.TXEN = 1;	//TX enable
-	pUsart0->CTRLB.bit.SBMODE = 0;	//1 stop bit
-	pUsart0->CTRLB.bit.CHSIZE = 0;	//8-bits
+	SERCOM0->USART.CTRLA.bit.DORD = 1;	//LSB first
+	SERCOM0->USART.CTRLA.bit.CMODE = 0;	//Async
+	SERCOM0->USART.CTRLA.bit.FORM = 0;	//USART frame
+	SERCOM0->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - A5 (A1 - board)
+	SERCOM0->USART.CTRLA.bit.TXPO = 0;	//PAD[0] - A4 (A4 - board)
+	SERCOM0->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
+	SERCOM0->USART.CTRLA.bit.MODE = 1;	//internal clk
 
+
+	SERCOM0->USART.CTRLB.bit.RXEN = 1;	//RX enable
+	SERCOM0->USART.CTRLB.bit.TXEN = 1;	//TX enable
+	SERCOM0->USART.CTRLB.bit.SBMODE = 0;	//1 stop bit
+	SERCOM0->USART.CTRLB.bit.CHSIZE = 0;	//8-bits
+	while(SERCOM0->USART.SYNCBUSY.bit.CTRLB);
 
 	//pin setup
 	PORT->Group[0].PMUX[2].bit.PMUXE = 3;
 	PORT->Group[0].PMUX[2].bit.PMUXO = 3;
 	PORT->Group[0].PINCFG[4].bit.DRVSTR = 1;
-	PORT->Group[0].PINCFG[5].bit.DRVSTR = 1;
+	PORT->Group[0].PINCFG[5].bit.INEN = 1;
+//	PORT->Group[0].PINCFG[5].bit.PULLEN = 1; //???????
+//	PORT->Group[0].CTRL.bit.SAMPLING |= 5;	//rx continuous sample
 
 	PORT->Group[0].PINCFG[4].bit.PMUXEN = 1;
 	PORT->Group[0].PINCFG[5].bit.PMUXEN = 1;
-	PORT->Group[0].DIRSET.bit.DIRSET = 4;
-	PORT->Group[0].DIRSET.bit.DIRSET = 5;
+	PORT->Group[0].DIRSET.reg |= (1 << 4);
+	PORT->Group[0].DIRCLR.reg |= (1 << 5);
+	PORT->Group[0].CTRL.reg |= (1 << 5);
 
 
+//	pUsart0->INTENSET.bit.RXC = 1;
+//	pUsart0->INTENSET.bit.DRE = 1;
+//	pUsart0->INTENSET.bit.RXS = 1;
 
-	pUsart0->INTENSET.bit.DRE = 1;
-	pUsart0->INTENSET.bit.TXC = 1;
-
-
-
+//	NVIC_EnableIRQ(SERCOM0_2_IRQn);
 
 	//6MHZ clk configured
-	pUsart0->BAUD.reg = 63019;	//115200 baud
+	SERCOM0->USART.BAUD.reg = 63019;	//115200 baud
 
-	pUsart0->CTRLA.bit.ENABLE = 1;	//enable
+	SERCOM0->USART.CTRLA.bit.ENABLE = 1;	//enable
 
-	while(pUsart0->SYNCBUSY.bit.ENABLE);
+	while(SERCOM0->USART.SYNCBUSY.bit.ENABLE);
 
 
 	return 0;
 }
+
+
+
+
+
+
+
+

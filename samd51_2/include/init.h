@@ -22,19 +22,4 @@ uint8_t dmac_init();
 
 uint8_t dmac_desc0_init();
 
-
-Dmac *pDmac;
-
-Sercom *pSercom0;
-
-Gclk *pGclk;
-
-Mclk *pMclk;
-
-Port *pPort;
-
-Osc32kctrl *pOsc32;
-
-Oscctrl *pOsc;
-
-
+uint8_t TC0_init();

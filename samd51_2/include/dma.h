@@ -4,11 +4,6 @@
 
 
 
-//DmacDescriptor *pDmadesc0;
-
-uint32_t dma0[4];
-uint32_t *pdma;
-
 
 typedef struct
 {
@@ -23,15 +18,12 @@ typedef struct
 
 
 
-
-
+uint8_t dmac_chan1_init();
+uint8_t dmac_chan0_init();
 
 uint8_t  dmac_desc0_init();
-
+uint8_t dmac_desc1_init();
 
 uint8_t dmac_init();
 
 
-uint8_t data_a[16];
-
-uint8_t data_b[16];
