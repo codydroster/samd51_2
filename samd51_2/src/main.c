@@ -34,7 +34,7 @@
 #include "init.h"
 #include "serial.h"
 #include "dma.h"
-
+#include "fc.h"
 
 
 int main()
@@ -49,7 +49,8 @@ int main()
 
 	while(1) {
 
-//		SERCOM0->USART.DATA.reg = 0x42;
+//		SERCOM1->USART.DATA.reg = 0x42;
+//		update_channel_values();
 
 
 	}

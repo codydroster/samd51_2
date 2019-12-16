@@ -7,7 +7,7 @@
 
 
 uint8_t serial0_init();
-
+uint8_t serial1_init();
 
 uint8_t uart_receive_xbee[12];
 

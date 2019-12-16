@@ -18,11 +18,16 @@ typedef struct
 
 
 
-uint8_t dmac_chan1_init();
 uint8_t dmac_chan0_init();
+uint8_t dmac_chan1_init();
+uint8_t dmac_chan2_init();
+uint8_t dmac_chan3_init();
 
 uint8_t  dmac_desc0_init();
 uint8_t dmac_desc1_init();
+uint8_t dmac_desc2_init();
+uint8_t dmac_desc3_init();
+
 
 uint8_t dmac_init();
 

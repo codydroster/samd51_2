@@ -35,7 +35,7 @@ uint8_t init()
 
 
 	serial0_init();
-
+	serial1_init();
 	dmac_init();
 	TC0_init();
 
@@ -61,7 +61,7 @@ uint8_t TC0_init()
 	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 1;
 	TC0->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC0->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x18d800;//0xdfffffff;
+	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0xffff;//0xdfffffff;
 
 	TC0->COUNT32.INTENSET.bit.OVF = 1;
 

@@ -16,4 +16,9 @@ uint16_t *yaw_trans;
 uint16_t *AUX1_trans;
 
 
+void update_channel_values();
 
+uint8_t transmit_data_fc[16];
+
+
+uint8_t receive_data_fc[16];
