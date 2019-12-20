@@ -1,24 +1,35 @@
 #include "init.h"
 
 
-uint16_t *throttle_value;
-uint16_t *roll_value;
-uint16_t *pitch_value;
-uint16_t *yaw_value;
-uint16_t *AUX1_value;
+typedef struct {
+	uint16_t throttle;
+	uint16_t roll;
+	uint16_t pitch;
+	uint16_t yaw;
+	uint16_t AUX1;
+
+} aircraft_values;
 
 
+aircraft_values fc_transmit;
 
-uint16_t *throttle_trans;
-uint16_t *roll_trans;
-uint16_t *pitch_trans;
-uint16_t *yaw_trans;
-uint16_t *AUX1_trans;
 
 
 void update_channel_values();
 
+
+//transmit flight control values to FC
 uint8_t transmit_data_fc[16];
 
-
+//receive attitude
 uint8_t receive_data_fc[16];
+
+
+//transmit attitude, raw GPS to base station.
+uint8_t uart_transmit_xbee[12];
+
+//receive flight control values
+uint8_t xbee_raw_receive[12];
+
+
+

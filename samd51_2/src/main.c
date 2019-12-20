@@ -32,7 +32,7 @@
 #include "samd51j19a.h"
 #include "main.h"
 #include "init.h"
-#include "serial.h"
+
 #include "dma.h"
 #include "fc.h"
 
@@ -41,7 +41,7 @@ int main()
 {
 	init();
 
-	while(!(MCLK->INTFLAG.reg));
+//	while(!(MCLK->INTFLAG.reg));
 
 
 

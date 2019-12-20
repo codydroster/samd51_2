@@ -6,21 +6,18 @@
  */
 
 #include "dma.h"
-#include "stdint.h"
+#include <stdint.h>
+#include "stdbool.h"
 #include <string.h>
-#include "serial.h"
+
 #include "fc.h"
 
 
 
 static DmacDescriptor wrb[4] __attribute ((aligned (128)));
 static DmacDescriptor descriptor_section[4] __attribute__ ((aligned (128)));
-DmacDescriptor desc0 __attribute__((aligned (sizeof(DmacDescriptor))));
-DmacDescriptor desc1 __attribute__((aligned (sizeof(DmacDescriptor))));
-DmacDescriptor desc2 __attribute__((aligned (sizeof(DmacDescriptor))));
-DmacDescriptor desc3 __attribute__((aligned (sizeof(DmacDescriptor))));
 
-uint8_t data_a[12];
+
 
 uint8_t dmac_init()
 {
@@ -29,202 +26,80 @@ uint8_t dmac_init()
 	DMAC->CTRL.reg = DMAC_CTRL_SWRST;
 
 
+	descriptor_section[0] = dmac_descriptor_init(&SERCOM0->USART.DATA.reg, &xbee_raw_receive, 12, 0);
+	descriptor_section[1] = dmac_descriptor_init(&uart_transmit_xbee, &SERCOM0->USART.DATA.reg, 12, 1);
 
-	dmac_desc0_init();
-	dmac_desc1_init();
-	dmac_desc2_init();
-	dmac_desc3_init();
+	descriptor_section[2] = dmac_descriptor_init(&SERCOM1->USART.DATA.reg, &receive_data_fc, 12, 0);
+	descriptor_section[3] = dmac_descriptor_init(&transmit_data_fc, &SERCOM1->USART.DATA.reg , 12, 1);
+
+	dmac_channel_init(0, 4, 1);
+	dmac_channel_init(1, 5, 0);
+	dmac_channel_init(2, 6, 1);
+	dmac_channel_init(3, 7, 0);
+
+
+	NVIC_EnableIRQ(DMAC_0_IRQn);
+	NVIC_EnableIRQ(DMAC_2_IRQn);
+
+
+
 
 	DMAC->BASEADDR.reg = (uint32_t) descriptor_section;
 	DMAC->WRBADDR.reg = (uint32_t) wrb;
 	DMAC->CTRL.reg = DMAC_CTRL_DMAENABLE | DMAC_CTRL_LVLEN(0xf);	//enable dmac
 
 
-	dmac_chan0_init();
-	dmac_chan1_init();
-	dmac_chan2_init();
-	dmac_chan3_init();
-
-	NVIC_EnableIRQ(DMAC_0_IRQn);
-	NVIC_EnableIRQ(DMAC_2_IRQn);
-
 	return 0;
 }
 
 
 
-uint8_t dmac_chan0_init()
+
+uint8_t dmac_channel_init(uint8_t chan, uint8_t trigger, _Bool tcmpl)
 {
+	DMAC->Channel[chan].CHCTRLA.reg |= (trigger << 8);	//RX trigger SERCOM0
+	DMAC->Channel[chan].CHCTRLA.bit.BURSTLEN = 0x0;	//single beat
 
-	DMAC->Channel[0].CHCTRLA.reg |= (4 << 8);	//RX trigger SERCOM0
-	DMAC->Channel[0].CHCTRLA.bit.BURSTLEN = 0x0;	//single beat
-	DMAC->Channel[0].CHINTENSET.bit.TCMPL = 1;		//transfer complete interrupt enable;
-	DMAC->Channel[0].CHCTRLA.bit.TRIGACT = 2;		//trigger per block
-	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
+	if(tcmpl) {
+		DMAC->Channel[chan].CHINTENSET.bit.TCMPL = 1;		//transfer complete interrupt enable;
+	}
 
-	return 0;
-
-
-}
-
-uint8_t dmac_chan1_init()
-{
-		DMAC->Channel[1].CHCTRLA.reg |= (5 << 8);	//TX trigger SERCOM0
-		DMAC->Channel[1].CHCTRLA.bit.BURSTLEN = 0x0;	//single beat
-//		DMAC->Channel[1].CHINTENSET.bit.TCMPL = 1;	//transfer complete interrupt enable;
-//		DMAC->Channel[1].CHINTENSET.bit.TERR = 1;
-		DMAC->Channel[1].CHCTRLA.bit.TRIGACT = 2;		//trigger per block
-		DMAC->Channel[1].CHCTRLA.bit.ENABLE = 1;
-
+	DMAC->Channel[chan].CHCTRLA.bit.TRIGACT = 2;		//trigger per block
+	DMAC->Channel[chan].CHCTRLA.bit.ENABLE = 1;
 
 		return 0;
 
 }
 
 
-
-
-uint8_t dmac_chan2_init()
+DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint16_t bytecnt, _Bool srcinc)
 {
+	DmacDescriptor desc __attribute__((aligned (sizeof(DmacDescriptor))));
 
-	DMAC->Channel[2].CHCTRLA.reg |= (6 << 8);	//RX trigger SERCOM0
-	DMAC->Channel[2].CHCTRLA.bit.BURSTLEN = 0x0;	//single beat
-	DMAC->Channel[2].CHINTENSET.bit.TCMPL = 1;		//transfer complete interrupt enable;
-	DMAC->Channel[2].CHCTRLA.bit.TRIGACT = 2;		//trigger per block
-	DMAC->Channel[2].CHCTRLA.bit.ENABLE = 1;
+	desc.BTCNT.reg = bytecnt;
+	desc.BTCTRL.bit.BEATSIZE = 0;	//8bit
+	desc.BTCTRL.bit.SRCINC = 0;
+	desc.BTCTRL.bit.DSTINC = 0;
+	if(srcinc){
+		desc.BTCTRL.bit.SRCINC = 1;
+	} else {
+		desc.BTCTRL.bit.DSTINC = 1;
+	}
 
-	return 0;
-
-
-}
-uint8_t dmac_chan3_init()
-{
-		DMAC->Channel[3].CHCTRLA.reg |= (7 << 8);	//TX trigger SERCOM1
-		DMAC->Channel[3].CHCTRLA.bit.BURSTLEN = 0x0;	//single beat
-//		DMAC->Channel[3].CHINTENSET.bit.TCMPL = 1;	//transfer complete interrupt enable;
-//		DMAC->Channel[3].CHINTENSET.bit.TERR = 1;
-		DMAC->Channel[3].CHCTRLA.bit.TRIGACT = 2;		//trigger per block
-		DMAC->Channel[3].CHCTRLA.bit.ENABLE = 1;
+	desc.SRCADDR.reg = (uint32_t) srcaddr;	//src address
+	desc.DSTADDR.reg = (uint32_t) destaddr + sizeof(*destaddr);	//destination address
+	desc.DESCADDR.reg = (uint32_t) 0;		//no additional descriptors in channel
+	desc.BTCTRL.bit.VALID = 1;
+	desc.BTCTRL.bit.BLOCKACT = 0;
 
 
-		return 0;
 
-}
-
-uint8_t dmac_desc0_init()
-{
-
-	desc0.BTCNT.reg = 12;
-	desc0.BTCTRL.bit.BEATSIZE = 0;	//8bit
-	desc0.BTCTRL.bit.DSTINC = 1;
-	desc0.SRCADDR.reg = (uint32_t) &(SERCOM0->USART.DATA.reg);	//src address
-	desc0.DSTADDR.reg = (uint32_t) &uart_receive_xbee + sizeof(uart_receive_xbee);	//destination address
-	desc0.DESCADDR.reg = (uint32_t) 0;		//no additional descriptors in channel
-	desc0.BTCTRL.bit.VALID = 1;
-	desc0.BTCTRL.bit.BLOCKACT = 0;
-	descriptor_section[0] = desc0;
-
-	return 0;
-
-}
-
-
-uint8_t dmac_desc1_init()
-{
-
-	desc1.BTCNT.reg = 12;
-	desc1.BTCTRL.bit.BEATSIZE = 0;	//8bit
-	desc1.BTCTRL.bit.SRCINC = 1;
-//	desc1.BTCTRL.bit.DSTINC = 0;
-	desc1.SRCADDR.reg = (uint32_t) &uart_transmit_xbee + sizeof(uart_transmit_xbee);
-	desc1.DSTADDR.reg = (uint32_t) &(SERCOM0->USART.DATA.reg);	//dst address
-	desc1.DESCADDR.reg = (uint32_t) 0;		//no additional descriptors in channel
-	desc1.BTCTRL.bit.VALID = 1;
-	desc1.BTCTRL.bit.BLOCKACT = 0;
-	descriptor_section[1] = desc1;
-
-
-	return 0;
+	return desc;
 
 }
 
 
 
-
-uint8_t dmac_desc2_init()
-{
-
-	desc2.BTCNT.reg = 12;
-	desc2.BTCTRL.bit.BEATSIZE = 0;	//8bit
-	desc2.BTCTRL.bit.DSTINC = 1;
-	desc2.SRCADDR.reg = (uint32_t) &(SERCOM1->USART.DATA.reg);	//src address
-	desc2.DSTADDR.reg = (uint32_t) &receive_data_fc + sizeof(receive_data_fc);	//destination address
-	desc2.DESCADDR.reg = (uint32_t) 0;		//no additional descriptors in channel
-	desc2.BTCTRL.bit.VALID = 1;
-	desc2.BTCTRL.bit.BLOCKACT = 0;
-	descriptor_section[2] = desc2;
-
-	return 0;
-
-}
-
-uint8_t dmac_desc3_init()
-{
-
-	desc3.BTCNT.reg = 16;
-	desc3.BTCTRL.bit.BEATSIZE = 0;	//8bit
-	desc3.BTCTRL.bit.SRCINC = 1;
-//	desc3.BTCTRL.bit.DSTINC = 0;
-	desc3.SRCADDR.reg = (uint32_t) &transmit_data_fc + sizeof(transmit_data_fc);
-	desc3.DSTADDR.reg = (uint32_t) &(SERCOM1->USART.DATA.reg);	//dst address
-	desc3.DESCADDR.reg = (uint32_t) 0;		//no additional descriptors in channel
-	desc3.BTCTRL.bit.VALID = 1;
-	desc3.BTCTRL.bit.BLOCKACT = 0;
-	descriptor_section[3] = desc3;
-
-
-	return 0;
-
-}
-
-
-
-
-void DMAC_0_Handler(void)	//transfer complete
-{
-	SERCOM0->USART.CTRLB.bit.RXEN = 0;
-
-	if(uart_receive_xbee[0] == 0x42 && uart_receive_xbee[1] == 0x43){
-
-			throttle_value = (uint16_t) ((uart_receive_xbee[2] << 8) | (uart_receive_xbee[3] & 0xff));
-			roll_value = (uint16_t) ((uart_receive_xbee[4] << 8) | (uart_receive_xbee[5] & 0xff));
-			pitch_value = (uint16_t) ((uart_receive_xbee[6] << 8) | (uart_receive_xbee[7] & 0xff));
-			yaw_value = (uint16_t) ((uart_receive_xbee[8] << 8) | (uart_receive_xbee[9] & 0xff));
-			AUX1_value = (uint16_t) ((uart_receive_xbee[10] << 8) | (uart_receive_xbee[1] & 0xff));
-
-
-			throttle_trans = (uint16_t) (0x8000 | (*throttle_value + 24U));
-			roll_trans = (uint16_t) (0x800U | (*roll_value + 24U));
-			pitch_trans = (uint16_t) (0x1000U | (*pitch_value + 24U));
-			yaw_trans = (uint16_t) (0x1800U | (*yaw_value + 24U));
-			AUX1_trans = (uint16_t) (0x2000U | (*AUX1_value + 24U));
-
-
-
-		} else {
-			for(int i = 0; i < 12; i++) {		//if no char match, clear array
-				uart_receive_xbee[i] = 0;
-			}
-		}
-
-
-
-
-
-	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
-	DMAC->Channel[0].CHINTFLAG.bit.TCMPL = 1;
-	SERCOM0->USART.CTRLB.bit.RXEN = 1;
-}
 
 void DMAC_2_Handler(void)	//transfer complete
 {

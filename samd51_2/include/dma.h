@@ -16,6 +16,9 @@ typedef struct
 } dmacdescriptor;
 
 
+DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint16_t bytecnt, _Bool srcinc);
+
+uint8_t dmac_channel_init(uint8_t chan, uint8_t trigger, _Bool tcmpl);
 
 
 uint8_t dmac_chan0_init();
