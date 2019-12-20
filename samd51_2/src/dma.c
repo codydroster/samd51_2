@@ -14,8 +14,8 @@
 
 
 
-static DmacDescriptor wrb[4] __attribute ((aligned (128)));
-static DmacDescriptor descriptor_section[4] __attribute__ ((aligned (128)));
+static DmacDescriptor wrb[6] __attribute ((aligned (128)));
+static DmacDescriptor descriptor_section[6] __attribute__ ((aligned (128)));
 
 
 
@@ -26,11 +26,11 @@ uint8_t dmac_init()
 	DMAC->CTRL.reg = DMAC_CTRL_SWRST;
 
 
-	descriptor_section[0] = dmac_descriptor_init(&SERCOM0->USART.DATA.reg, &xbee_raw_receive, 12, 0);
-	descriptor_section[1] = dmac_descriptor_init(&uart_transmit_xbee, &SERCOM0->USART.DATA.reg, 12, 1);
+	descriptor_section[0] = dmac_descriptor_init(&(SERCOM0->USART.DATA.reg), xbee_raw_receive, 12, 0);
+	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 12, 1);
 
-	descriptor_section[2] = dmac_descriptor_init(&SERCOM1->USART.DATA.reg, &receive_data_fc, 12, 0);
-	descriptor_section[3] = dmac_descriptor_init(&transmit_data_fc, &SERCOM1->USART.DATA.reg , 12, 1);
+	descriptor_section[2] = dmac_descriptor_init(&(SERCOM1->USART.DATA.reg), receive_data_fc, 12, 0);
+	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 12, 1);
 
 	dmac_channel_init(0, 4, 1);
 	dmac_channel_init(1, 5, 0);
@@ -82,12 +82,16 @@ DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint1
 	desc.BTCTRL.bit.DSTINC = 0;
 	if(srcinc){
 		desc.BTCTRL.bit.SRCINC = 1;
+		desc.SRCADDR.reg = (uint32_t) (srcaddr) + bytecnt;	//src address
+		desc.DSTADDR.reg = (uint32_t) destaddr;
 	} else {
 		desc.BTCTRL.bit.DSTINC = 1;
+		desc.SRCADDR.reg = (uint32_t) srcaddr;
+		desc.DSTADDR.reg = (uint32_t) (destaddr) + bytecnt;	//destination address
 	}
 
-	desc.SRCADDR.reg = (uint32_t) srcaddr;	//src address
-	desc.DSTADDR.reg = (uint32_t) destaddr + sizeof(*destaddr);	//destination address
+
+
 	desc.DESCADDR.reg = (uint32_t) 0;		//no additional descriptors in channel
 	desc.BTCTRL.bit.VALID = 1;
 	desc.BTCTRL.bit.BLOCKACT = 0;

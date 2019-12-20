@@ -19,7 +19,7 @@ void update_channel_values();
 
 
 //transmit flight control values to FC
-uint8_t transmit_data_fc[16];
+ uint8_t transmit_data_fc[16];
 
 //receive attitude
 uint8_t receive_data_fc[16];

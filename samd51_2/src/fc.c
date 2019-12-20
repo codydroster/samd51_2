@@ -9,7 +9,7 @@
 #include "fc.h"
 
 
-//uint8_t transmit_data_fc[16] = {0xab,0xcd,0xef,0xab,0xcd,0xef,0xab,0xcd,0xef,0xab,0xcd,0xef,0xab,0xcd,0xef,0xff};
+uint8_t uart_transmit_xbee[12] = {0xab,0xcd,0xef,0xab,0xcd,0xef,0xab,0xcd,0xef,0xab,0xcd,0xef};
 
 
 //DMA transmit to FC periodically. Change TC0 TOP value????
@@ -86,11 +86,11 @@ void DMAC_0_Handler(void)	//transfer complete
 
 
 
-		} else {
-			for(int i = 0; i < 12; i++) {		//if no char match, clear array
-				xbee_raw_receive[i] = 0;
-			}
-		}
+		}// else {
+	//		for(int i = 0; i < 12; i++) {		//if no char match, clear array
+	//			xbee_raw_receive[i] = 0;
+	//		}
+	//	}
 
 
 	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
