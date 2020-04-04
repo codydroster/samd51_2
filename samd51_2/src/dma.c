@@ -26,11 +26,11 @@ uint8_t dmac_init()
 	DMAC->CTRL.reg = DMAC_CTRL_SWRST;
 
 
-	descriptor_section[0] = dmac_descriptor_init(&(SERCOM0->USART.DATA.reg), xbee_raw_receive, 12, 0);
+	descriptor_section[0] = dmac_descriptor_init(&(SERCOM0->USART.DATA.reg), xbee_raw_receive, 14, 0);
 	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 12, 1);
 
 	descriptor_section[2] = dmac_descriptor_init(&(SERCOM1->USART.DATA.reg), receive_data_fc, 12, 0);
-	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 12, 1);
+	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 16, 1);
 
 	dmac_channel_init(0, 4, 1);
 	dmac_channel_init(1, 5, 0);
@@ -46,6 +46,7 @@ uint8_t dmac_init()
 
 	DMAC->BASEADDR.reg = (uint32_t) descriptor_section;
 	DMAC->WRBADDR.reg = (uint32_t) wrb;
+	DMAC->DBGCTRL.bit.DBGRUN = 1;
 	DMAC->CTRL.reg = DMAC_CTRL_DMAENABLE | DMAC_CTRL_LVLEN(0xf);	//enable dmac
 
 
@@ -79,6 +80,7 @@ DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint1
 	desc.BTCNT.reg = bytecnt;
 	desc.BTCTRL.bit.BEATSIZE = 0;	//8bit
 	desc.BTCTRL.bit.SRCINC = 0;
+	desc.BTCTRL.bit.STEPSIZE = 0;
 	desc.BTCTRL.bit.DSTINC = 0;
 	if(srcinc){
 		desc.BTCTRL.bit.SRCINC = 1;

@@ -61,7 +61,7 @@ uint8_t TC0_init()
 	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 1;
 	TC0->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC0->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0xffff;//0xdfffffff;
+	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x249F00;//0x80E80;//0xdfffffff;
 
 	TC0->COUNT32.INTENSET.bit.OVF = 1;
 
@@ -150,7 +150,7 @@ uint8_t serial0_init()
 
 
 
-	//SERCOM init
+	//SERCOM init xbee
 
 
 	SERCOM0->USART.CTRLA.bit.DORD = 1;	//LSB first
@@ -208,10 +208,10 @@ uint8_t serial1_init()
 
 
 
-	//SERCOM init
+	//SERCOM init FC
 
 
-	SERCOM1->USART.CTRLA.bit.DORD = 1;	//LSB first
+	SERCOM1->USART.CTRLA.bit.DORD = 1;	//MSB first
 	SERCOM1->USART.CTRLA.bit.CMODE = 0;	//Async
 	SERCOM1->USART.CTRLA.bit.FORM = 0;	//USART frame
 	SERCOM1->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - A17 (SCK - board)
