@@ -41,16 +41,15 @@ int main()
 {
 	init();
 
-//	while(!(MCLK->INTFLAG.reg));
-
 
 
 
 
 	while(1) {
 		update_channel_values();
-//		SERCOM1->USART.DATA.reg = 0x42;
-//		update_channel_values();
+
+
+
 
 
 	}

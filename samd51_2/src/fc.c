@@ -72,6 +72,7 @@ void update_channel_values(void)
 	transmit_data_fc[14] = 0xff;
 	transmit_data_fc[15] = 0xff;
 
+	test = SERCOM3->USART.DATA.reg;
 
 }
 

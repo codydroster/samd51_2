@@ -18,7 +18,7 @@ typedef struct {
 
 } aircraft_values;
 
-
+uint16_t test;
 
 
 

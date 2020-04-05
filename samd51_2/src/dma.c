@@ -29,6 +29,9 @@ uint8_t dmac_init()
 	descriptor_section[0] = dmac_descriptor_init(&(SERCOM0->USART.DATA.reg), xbee_raw_receive, 14, 0);
 	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 12, 1);
 
+	descriptor_section[2] = dmac_descriptor_init(&(SERCOM2->USART.DATA.reg), receive_data_fc, 12, 0);
+	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 16, 1);
+
 	descriptor_section[2] = dmac_descriptor_init(&(SERCOM1->USART.DATA.reg), receive_data_fc, 12, 0);
 	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 16, 1);
 

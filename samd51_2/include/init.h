@@ -27,4 +27,6 @@ uint8_t TC0_init();
 
 uint8_t serial0_init();
 uint8_t serial1_init();
-
+uint8_t serial2_init();
+uint8_t serial3_init();
+uint8_t serial4_init();
