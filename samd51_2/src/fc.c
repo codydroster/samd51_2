@@ -107,22 +107,26 @@ void DMAC_0_Handler(void)	//transfer complete
 		}
 
 	}
-	if (index_start == 14) {					/////////not sure if this loop actually works.
+	if (index_start == 14) {					//not sure if this loop actually works.
+												//special case, not sure how to loop back to 0
 		if(xbee_raw_receive[0] == 0x43) {
-			for (uint8_t i = 1; i < 13; i++) {
-				xbee_rx_sorted[i - 1] = xbee_raw_receive[i];
+			xbee_rx_sorted[0] = xbee_raw_receive[14];
+
+			for (uint8_t i = 0; i < 14; i++) {
+				xbee_rx_sorted[i+1] = xbee_raw_receive[i];
 			}
 
 		}
 
 
-	} else {									///this cant work???
+	} else {									///this cant work???	//maybe now it does? 4/9
 		if(xbee_raw_receive[index_start + 1] == 0x43) {
-			for (uint8_t i = (index_start); i < (14 - index_start); i++) {
-				xbee_rx_sorted[i - index_start] = xbee_raw_receive[i];
+			for (uint8_t i = 0; i < (14 - index_start); i++) {
+				xbee_rx_sorted[i] = xbee_raw_receive[index_start + i];
+
 			}
-			for (uint8_t i = 0; i < index_start + 2; i++) {
-				xbee_rx_sorted[i] = xbee_raw_receive[index_start];
+			for (uint8_t i = 0; i < index_start; i++) {
+				xbee_rx_sorted[i + (14 - index_start)] = xbee_raw_receive[i];
 		}
 	}
 
