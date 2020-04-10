@@ -27,18 +27,19 @@ uint8_t dmac_init()
 
 
 	descriptor_section[0] = dmac_descriptor_init(&(SERCOM0->USART.DATA.reg), xbee_raw_receive, 14, 0);
-	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 12, 1);
+	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 10, 1);
 
-	descriptor_section[2] = dmac_descriptor_init(&(SERCOM2->USART.DATA.reg), receive_data_fc, 12, 0);
+	descriptor_section[2] = dmac_descriptor_init(&(SERCOM3->USART.DATA.reg), receive_data_fc, 10, 0);
 	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 16, 1);
 
-	descriptor_section[2] = dmac_descriptor_init(&(SERCOM1->USART.DATA.reg), receive_data_fc, 12, 0);
-	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 16, 1);
+	descriptor_section[4] = dmac_descriptor_init(&(SERCOM2->USART.DATA.reg), receive_data_GPS, 12, 0);
+
 
 	dmac_channel_init(0, 4, 1);
 	dmac_channel_init(1, 5, 0);
-	dmac_channel_init(2, 6, 1);
+	dmac_channel_init(2, 0xA, 1);
 	dmac_channel_init(3, 7, 0);
+	dmac_channel_init(4, 8, 1);
 
 
 	NVIC_EnableIRQ(DMAC_0_IRQn);
@@ -110,11 +111,4 @@ DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint1
 
 
 
-void DMAC_2_Handler(void)	//transfer complete
-{
-
-	DMAC->Channel[2].CHCTRLA.bit.ENABLE = 1;
-	DMAC->Channel[2].CHINTFLAG.bit.TCMPL = 1;
-
-}
 

@@ -41,6 +41,7 @@ uint8_t init()
 	serial4_init();
 	dmac_init();
 	TC0_init();
+	TC2_init();
 
 
 
@@ -82,6 +83,40 @@ uint8_t TC0_init()
 return 0;
 
 }
+
+uint8_t TC2_init()
+{
+	MCLK->APBBMASK.bit.TC2_ = 1;
+	MCLK->APBBMASK.bit.TC3_ = 1;
+
+	GCLK->PCHCTRL[26].bit.GEN = 0;	//48Mhz source
+
+	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
+	GCLK->PCHCTRL[26].bit.CHEN = 1;
+	TC2->COUNT32.CTRLA.bit.MODE = 2;
+	TC3->COUNT32.CTRLA.bit.MODE = 2;
+	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 1;
+	TC2->COUNT32.CTRLBSET.bit.DIR = 0;
+	TC2->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
+	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0x249F00;//0x80E80;//0xdfffffff;
+
+	TC2->COUNT32.INTENSET.bit.OVF = 1;
+
+	TC3->COUNT16.CTRLA.bit.ENABLE = 1;
+	while(TC3->COUNT16.SYNCBUSY.bit.ENABLE);
+
+	TC2->COUNT32.CTRLA.bit.ENABLE = 1;
+	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
+
+
+
+
+	NVIC_EnableIRQ(TC2_IRQn);	//overflow interrupt
+
+return 0;
+
+}
+
 
 uint8_t clk_output()
 {
