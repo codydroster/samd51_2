@@ -14,8 +14,8 @@
 
 
 
-static DmacDescriptor wrb[6] __attribute ((aligned (128)));
-static DmacDescriptor descriptor_section[6] __attribute__ ((aligned (128)));
+static DmacDescriptor wrb[4] __attribute ((aligned (128)));
+static DmacDescriptor descriptor_section[3] __attribute__ ((aligned (128)));
 
 
 
@@ -27,23 +27,23 @@ uint8_t dmac_init()
 
 
 	descriptor_section[0] = dmac_descriptor_init(&(SERCOM0->USART.DATA.reg), xbee_raw_receive, 14, 0);
-	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 10, 1);
 
-	descriptor_section[2] = dmac_descriptor_init(&(SERCOM3->USART.DATA.reg), receive_data_fc, 10, 0);
-	descriptor_section[3] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 16, 1);
+	descriptor_section[1] = dmac_descriptor_init(&(SERCOM3->USART.DATA.reg), receive_data_fc, 12, 0);
+	descriptor_section[2] = dmac_descriptor_init(transmit_data_fc, &(SERCOM1->USART.DATA.reg) , 18, 1);
 
-	descriptor_section[4] = dmac_descriptor_init(&(SERCOM2->USART.DATA.reg), receive_data_GPS, 12, 0);
+//	descriptor_section[1] = dmac_descriptor_init(uart_transmit_xbee, &(SERCOM0->USART.DATA.reg), 10, 1);
+//	descriptor_section[4] = dmac_descriptor_init(&(SERCOM2->USART.DATA.reg), receive_data_GPS, 800, 0);
 
 
 	dmac_channel_init(0, 4, 1);
-	dmac_channel_init(1, 5, 0);
-	dmac_channel_init(2, 0xA, 1);
-	dmac_channel_init(3, 7, 0);
-	dmac_channel_init(4, 8, 1);
+//	dmac_channel_init(1, 5, 0);
+	dmac_channel_init(1, 0xA, 1);
+	dmac_channel_init(2, 7, 0);
+//	dmac_channel_init(4, 8, 1);
 
 
 	NVIC_EnableIRQ(DMAC_0_IRQn);
-	NVIC_EnableIRQ(DMAC_2_IRQn);
+	NVIC_EnableIRQ(DMAC_1_IRQn);
 
 
 
@@ -62,7 +62,7 @@ uint8_t dmac_init()
 
 uint8_t dmac_channel_init(uint8_t chan, uint8_t trigger, _Bool tcmpl)
 {
-	DMAC->Channel[chan].CHCTRLA.reg |= (trigger << 8);	//RX trigger SERCOM0
+	DMAC->Channel[chan].CHCTRLA.reg |= (trigger << 8);	//trigger
 	DMAC->Channel[chan].CHCTRLA.bit.BURSTLEN = 0x0;	//single beat
 
 	if(tcmpl) {

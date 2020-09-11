@@ -51,6 +51,8 @@ return 0;
 
 }
 
+
+//Transmit to FC periodically
 uint8_t TC0_init()
 {
 	MCLK->APBAMASK.bit.TC0_ = 1;
@@ -84,6 +86,7 @@ return 0;
 
 }
 
+//GPS
 uint8_t TC2_init()
 {
 	MCLK->APBBMASK.bit.TC2_ = 1;
@@ -94,16 +97,15 @@ uint8_t TC2_init()
 	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
 	GCLK->PCHCTRL[26].bit.CHEN = 1;
 	TC2->COUNT32.CTRLA.bit.MODE = 2;
-	TC3->COUNT32.CTRLA.bit.MODE = 2;
-	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 1;
+//	TC3->COUNT32.CTRLA.bit.MODE = 2;
+	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 0;	//???
 	TC2->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC2->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0x249F00;//0x80E80;//0xdfffffff;
+
+	//95uS
+	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0x4000;//0x1D4C00;//0x80E80;//0xdfffffff;
 
 	TC2->COUNT32.INTENSET.bit.OVF = 1;
-
-	TC3->COUNT16.CTRLA.bit.ENABLE = 1;
-	while(TC3->COUNT16.SYNCBUSY.bit.ENABLE);
 
 	TC2->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
@@ -111,11 +113,13 @@ uint8_t TC2_init()
 
 
 
-	NVIC_EnableIRQ(TC2_IRQn);	//overflow interrupt
+//	NVIC_EnableIRQ(TC2_IRQn);	//overflow interrupt
 
 return 0;
 
 }
+
+
 
 
 uint8_t clk_output()
@@ -211,8 +215,6 @@ uint8_t serial0_init()
 	PORT->Group[0].PMUX[2].bit.PMUXO = 3;
 	PORT->Group[0].PINCFG[4].bit.DRVSTR = 1;
 	PORT->Group[0].PINCFG[5].bit.INEN = 1;
-//	PORT->Group[0].PINCFG[5].bit.PULLEN = 1; //???????
-//	PORT->Group[0].CTRL.bit.SAMPLING |= 5;	//rx continuous sample
 
 	PORT->Group[0].PINCFG[4].bit.PMUXEN = 1;
 	PORT->Group[0].PINCFG[5].bit.PMUXEN = 1;
@@ -222,7 +224,7 @@ uint8_t serial0_init()
 
 
 	//6MHZ clk configured
-	SERCOM0->USART.BAUD.reg = 63019;	//115200 baud
+	SERCOM0->USART.BAUD.reg = 60503;	//230400 baud (63019:115200)
 
 	SERCOM0->USART.CTRLA.bit.ENABLE = 1;	//enable
 
@@ -316,11 +318,14 @@ uint8_t serial2_init()
 	SERCOM2->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
 	SERCOM2->USART.CTRLA.bit.MODE = 1;	//internal clk
 
+//	SERCOM2->USART.INTENSET.bit.RXS = 1;
+	SERCOM2->USART.INTENSET.bit.RXC = 1;
 
 	SERCOM2->USART.CTRLB.bit.RXEN = 1;	//RX enable
 	SERCOM2->USART.CTRLB.bit.TXEN = 1;	//TX enable
 	SERCOM2->USART.CTRLB.bit.SBMODE = 0;	//1 stop bit
 	SERCOM2->USART.CTRLB.bit.CHSIZE = 0;	//8-bits
+	SERCOM2->USART.CTRLB.bit.SFDE = 1;	//start frame detection
 	while(SERCOM2->USART.SYNCBUSY.bit.CTRLB);
 
 	//pin setup
@@ -338,7 +343,7 @@ uint8_t serial2_init()
 
 
 
-//	NVIC_EnableIRQ(SERCOM0_2_IRQn);
+	NVIC_EnableIRQ(SERCOM2_2_IRQn);
 
 
 	//6MHZ clk configured
