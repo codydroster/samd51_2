@@ -23,8 +23,8 @@ typedef struct {
 
 } aircraft_attitude;
 
-aircraft_ctrl fc_transmit;
-aircraft_attitude drone_attitude;
+extern aircraft_ctrl fc_transmit;
+extern aircraft_attitude drone_attitude;
 
 
 
@@ -32,25 +32,25 @@ void update_channel_values();
 
 
 //transmit flight control values to FC
- uint8_t transmit_data_fc[18];
+extern uint8_t transmit_data_fc[18];
 
 //receive attitude
-uint8_t receive_data_fc[10];
+extern uint8_t receive_data_fc[10];
 
 
 //transmit attitude, raw GPS to base station.
-uint8_t uart_transmit_xbee[12];
+extern uint8_t uart_transmit_xbee[12];
 
 
 //receive flight control values
-uint8_t xbee_raw_receive[14];
-uint8_t xbee_rx_sorted[14];
+extern uint8_t xbee_raw_receive[14];
+extern uint8_t xbee_rx_sorted[14];
 
 //receive GPS RAW Data
-uint8_t receive_data_GPS[600];
-uint16_t GPS_index;
+extern uint8_t receive_data_GPS[600];
+extern uint16_t GPS_index;
 
 
-uint16_t AUX1_buffer[2];
-uint16_t AUX2_buffer[2];
+extern uint16_t AUX1_buffer[2];
+extern uint16_t AUX2_buffer[2];
 

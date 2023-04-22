@@ -9,8 +9,34 @@
 #include "fc.h"
 #include "dma.h"
 
+//transmit flight control values to FC
+ uint8_t transmit_data_fc[18];
+
+//receive attitude
+ uint8_t receive_data_fc[10];
+
+
+//transmit attitude, raw GPS to base station.
+ uint8_t uart_transmit_xbee[12];
+
+
+//receive flight control values
+ uint8_t xbee_raw_receive[14];
+ uint8_t xbee_rx_sorted[14];
+
+//receive GPS RAW Data
+ uint8_t receive_data_GPS[600];
+ uint16_t GPS_index;
+
+
 uint16_t AUX1_buffer[2] = {0,0};
 uint16_t AUX2_buffer[2] = {0,0};
+
+aircraft_ctrl fc_transmit;
+aircraft_attitude drone_attitude;
+
+
+
 
 aircraft_ctrl fc_transmit = {
 		.throttle = 0x00,
@@ -51,7 +77,7 @@ void TC2_Handler(void)
 
 	for(uint8_t i = 0; i < 12; i++) {
 
-		SERCOM0->USART.DATA.reg =uart_transmit_xbee[i];
+		SERCOM0->USART.DATA.reg = uart_transmit_xbee[i];
 		while(!(SERCOM0->USART.INTFLAG.bit.TXC));
 	}
 
@@ -124,46 +150,21 @@ void update_channel_values(void)
 }
 
 
+void SERCOM0_2_Handler(void)
+{
+	if(SERCOM0->USART.DATA.reg == 0x42) {
+		SERCOM0->USART.INTENCLR.bit.RXC = 1;
+		DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
 
+	}
+}
 
 //receive from xbee. convert to values for transmission to FC. ONLY FLIGHT CONTROL VALUES
-
 void DMAC_0_Handler(void)	//transfer complete
 {
 	SERCOM0->USART.CTRLB.bit.RXEN = 0;	//clear RX buffer
 
-	uint8_t index_start;
 
-
-	for (uint8_t i = 0; i< 13; i++) {
-		if(xbee_raw_receive[i] == 0x42) {
-			index_start = i;
-			break;
-		}
-
-	}
-	if (index_start == 14) {					//not sure if this loop actually works.
-
-		if(xbee_raw_receive[0] == 0x43) {
-			xbee_rx_sorted[0] = xbee_raw_receive[14];
-
-			for (uint8_t i = 0; i < 14; i++) {
-				xbee_rx_sorted[i+1] = xbee_raw_receive[i];
-			}
-
-		}
-
-
-	} else {									///this cant work???	//maybe now it does? 4/9
-		if(xbee_raw_receive[index_start + 1] == 0x43) {
-			for (uint8_t i = 0; i < (14 - index_start); i++) {
-				xbee_rx_sorted[i] = xbee_raw_receive[index_start + i];
-
-			}
-			for (uint8_t i = 0; i < index_start; i++) {
-				xbee_rx_sorted[i + (14 - index_start)] = xbee_raw_receive[i];
-		}
-	}
 		//FIFO
 
 		AUX1_buffer[1] = AUX1_buffer[0];
@@ -174,10 +175,10 @@ void DMAC_0_Handler(void)	//transfer complete
 		AUX2_buffer[0] = (uint16_t) ((xbee_rx_sorted[12] << 8) | (xbee_rx_sorted[13] & 0xff));
 
 
-	}
+
 
 //?????????
-	if (xbee_rx_sorted[0] == 0x42 && xbee_rx_sorted[1] == 0x43) {
+	if (xbee_rx_sorted[0] == 0x42 && xbee_rx_sorted[13] == 0x43) {
 		fc_transmit.throttle = (uint16_t) ((xbee_rx_sorted[2] << 8) | (xbee_rx_sorted[3] & 0xff));
 		fc_transmit.roll = (uint16_t) ((xbee_rx_sorted[4] << 8) | (xbee_rx_sorted[5] & 0xff));
 		fc_transmit.pitch = (uint16_t) ((xbee_rx_sorted[6] << 8) | (xbee_rx_sorted[7] & 0xff));
@@ -204,8 +205,9 @@ void DMAC_0_Handler(void)	//transfer complete
 
 
 
-	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
+//	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
 	DMAC->Channel[0].CHINTFLAG.bit.TCMPL = 1;
+	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 0;
 	SERCOM0->USART.CTRLB.bit.RXEN = 1;
 }
 

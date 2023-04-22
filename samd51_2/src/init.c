@@ -203,12 +203,16 @@ uint8_t serial0_init()
 	SERCOM0->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
 	SERCOM0->USART.CTRLA.bit.MODE = 1;	//internal clk
 
+	//interupt enable
+	SERCOM0->USART.INTENSET.bit.RXC = 1;
+
 
 	SERCOM0->USART.CTRLB.bit.RXEN = 1;	//RX enable
 	SERCOM0->USART.CTRLB.bit.TXEN = 1;	//TX enable
 	SERCOM0->USART.CTRLB.bit.SBMODE = 0;	//1 stop bit
 	SERCOM0->USART.CTRLB.bit.CHSIZE = 0;	//8-bits
 	while(SERCOM0->USART.SYNCBUSY.bit.CTRLB);
+
 
 	//pin setup
 	PORT->Group[0].PMUX[2].bit.PMUXE = 3;
