@@ -71,6 +71,7 @@ void TC0_Handler(void)
 }
 
 //transmit after ~600byte RAW GPS packet
+//SERCOM2 ISR controls when this executes
 void TC2_Handler(void)
 {
 
@@ -116,6 +117,11 @@ void SERCOM2_2_Handler(void)
 //Array  to be transmitted to FC, Spectrum 2048 protocol. DMA transfer periodically TC0
 void update_channel_values(void)
 {
+
+
+
+
+
 	TC2->COUNT32.INTFLAG.bit.MC1 = 1;
 
 	transmit_data_fc[0] = 0x0;	// missed frames [1]
@@ -152,9 +158,11 @@ void update_channel_values(void)
 
 void SERCOM0_2_Handler(void)
 {
-	if(SERCOM0->USART.DATA.reg == 0x42) {
+	uint8_t received_value = SERCOM0->USART.DATA.reg;
+	if(received_value == 0x42) {
 		SERCOM0->USART.INTENCLR.bit.RXC = 1;
 		DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
+		xbee_raw_receive[0] = 0x42;
 
 	}
 }
@@ -165,50 +173,38 @@ void DMAC_0_Handler(void)	//transfer complete
 	SERCOM0->USART.CTRLB.bit.RXEN = 0;	//clear RX buffer
 
 
-		//FIFO
 
-		AUX1_buffer[1] = AUX1_buffer[0];
-		AUX1_buffer[0] = (uint16_t) ((xbee_rx_sorted[10] << 8) | (xbee_rx_sorted[11] & 0xff));
+	if (xbee_raw_receive[0] == 0x42 && xbee_raw_receive[13] == 0x43) {
+		uint16_t throttle = (uint16_t) ((xbee_raw_receive[1] << 8) | (xbee_raw_receive[2] & 0xff));
+		fc_transmit.throttle = throttle;
 
+		uint16_t roll = (uint16_t) ((xbee_raw_receive[3] << 8) | (xbee_raw_receive[4] & 0xff));
+		fc_transmit.roll = roll;
 
-		AUX2_buffer[1] = AUX2_buffer[0];
-		AUX2_buffer[0] = (uint16_t) ((xbee_rx_sorted[12] << 8) | (xbee_rx_sorted[13] & 0xff));
+		uint16_t pitch = (uint16_t) ((xbee_raw_receive[5] << 8) | (xbee_raw_receive[6] & 0xff));
+		fc_transmit.pitch = pitch;
 
+		uint16_t yaw = (uint16_t) ((xbee_raw_receive[7] << 8) | (xbee_raw_receive[8] & 0xff));
+		fc_transmit.yaw = yaw;
 
+		uint16_t AUX1 = (uint16_t) ((xbee_raw_receive[9] << 8) | (xbee_raw_receive[10] & 0xff));
+		fc_transmit.AUX1 = AUX1;
 
-
-//?????????
-	if (xbee_rx_sorted[0] == 0x42 && xbee_rx_sorted[13] == 0x43) {
-		fc_transmit.throttle = (uint16_t) ((xbee_rx_sorted[2] << 8) | (xbee_rx_sorted[3] & 0xff));
-		fc_transmit.roll = (uint16_t) ((xbee_rx_sorted[4] << 8) | (xbee_rx_sorted[5] & 0xff));
-		fc_transmit.pitch = (uint16_t) ((xbee_rx_sorted[6] << 8) | (xbee_rx_sorted[7] & 0xff));
-		fc_transmit.yaw = (uint16_t) ((xbee_rx_sorted[8] << 8) | (xbee_rx_sorted[9] & 0xff));
-
-//		fc_transmit.AUX1 = (uint16_t) ((xbee_rx_sorted[10] << 8) | (xbee_rx_sorted[11] & 0xff));
-//		fc_transmit.AUX2 = (uint16_t) ((xbee_rx_sorted[12] << 8) | (xbee_rx_sorted[13] & 0xff));
-
-
-
-		//problem with drone transmitting erroneous values
-		if(AUX1_buffer[0] == AUX1_buffer[1]){
-			fc_transmit.AUX1 = AUX1_buffer[0];
-		}
-		if(AUX2_buffer[0] == AUX2_buffer[1]){
-			fc_transmit.AUX2 = AUX2_buffer[0];
-		}
-		}
+		uint16_t AUX2 = (uint16_t) ((xbee_raw_receive[11] << 8) | (xbee_raw_receive[12] & 0xff));
+		fc_transmit.AUX2 = AUX2;
 
 
 
 
-
-
-
-
-//	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 1;
 	DMAC->Channel[0].CHINTFLAG.bit.TCMPL = 1;
+
+	//maybe try suspend instead?
 	DMAC->Channel[0].CHCTRLA.bit.ENABLE = 0;
+	SERCOM0->USART.INTENSET.bit.RXC = 1;
+
+	//should be enabled already
 	SERCOM0->USART.CTRLB.bit.RXEN = 1;
+
 }
 
 
@@ -225,17 +221,15 @@ void DMAC_1_Handler(void)	//transfer complete
 		drone_attitude.altitude = (uint16_t) ((receive_data_fc[8] << 8) | (receive_data_fc[9] & 0xff));
 
 		uart_transmit_xbee[0] = 0x42;
-		uart_transmit_xbee[1] = 0x43;
-		uart_transmit_xbee[2] = 0x44;
-		uart_transmit_xbee[3] = 0x45;
-		uart_transmit_xbee[4] = (uint8_t) (drone_attitude.pitch >> 8);
-		uart_transmit_xbee[5] = (uint8_t) (drone_attitude.pitch & 0xff);
-		uart_transmit_xbee[6] = (uint8_t) (drone_attitude.roll>> 8);
-		uart_transmit_xbee[7] = (uint8_t) (drone_attitude.roll & 0xff);
-		uart_transmit_xbee[8] = (uint8_t) (drone_attitude.heading >> 8);
-		uart_transmit_xbee[9] = (uint8_t) (drone_attitude.heading & 0xff);
-		uart_transmit_xbee[10] = (uint8_t) (drone_attitude.altitude >> 8);
-		uart_transmit_xbee[11] = (uint8_t) (drone_attitude.altitude & 0xff);
+		uart_transmit_xbee[1] = (uint8_t) (drone_attitude.pitch >> 8);
+		uart_transmit_xbee[2] = (uint8_t) (drone_attitude.pitch & 0xff);
+		uart_transmit_xbee[3] = (uint8_t) (drone_attitude.roll>> 8);
+		uart_transmit_xbee[4] = (uint8_t) (drone_attitude.roll & 0xff);
+		uart_transmit_xbee[5] = (uint8_t) (drone_attitude.heading >> 8);
+		uart_transmit_xbee[6] = (uint8_t) (drone_attitude.heading & 0xff);
+		uart_transmit_xbee[7] = (uint8_t) (drone_attitude.altitude >> 8);
+		uart_transmit_xbee[8] = (uint8_t) (drone_attitude.altitude & 0xff);
+		uart_transmit_xbee[9] = 0x43;
 
 	} else {
 	for(int i = 0; i < 12; i++) {		//if no char match, clear array
@@ -249,7 +243,7 @@ void DMAC_1_Handler(void)	//transfer complete
 		SERCOM3->USART.CTRLB.bit.RXEN = 1;
 
 
-
+}
 }
 
 

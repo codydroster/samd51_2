@@ -79,7 +79,7 @@ uint8_t dmac_channel_init(uint8_t chan, uint8_t trigger, _Bool tcmpl)
 }
 
 
-DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint16_t bytecnt, _Bool srcinc)
+DmacDescriptor dmac_descriptor_init(uint32_t *srcaddr, uint32_t *destaddr, uint16_t bytecnt, bool srcinc)
 {
 	DmacDescriptor desc __attribute__((aligned (sizeof(DmacDescriptor))));
 

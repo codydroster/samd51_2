@@ -198,8 +198,8 @@ uint8_t serial0_init()
 	SERCOM0->USART.CTRLA.bit.DORD = 1;	//LSB first
 	SERCOM0->USART.CTRLA.bit.CMODE = 0;	//Async
 	SERCOM0->USART.CTRLA.bit.FORM = 0;	//USART frame
-	SERCOM0->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - A5 (A1 - board)
-	SERCOM0->USART.CTRLA.bit.TXPO = 0;	//PAD[0] - A4 (A4 - board)
+	SERCOM0->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - A05 (A1 - board)
+	SERCOM0->USART.CTRLA.bit.TXPO = 0;	//PAD[0] - A04 (A4 - board)
 	SERCOM0->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
 	SERCOM0->USART.CTRLA.bit.MODE = 1;	//internal clk
 
@@ -252,7 +252,7 @@ uint8_t serial1_init()
 
 
 
-	//SERCOM init FC TX
+	//SERCOM init FC TX (M4 to FC)
 
 
 	SERCOM1->USART.CTRLA.bit.DORD = 1;	//LSB first ?????
@@ -376,14 +376,14 @@ uint8_t serial3_init()
 
 
 
-	//SERCOM init FC RX
+	//SERCOM init FC RX (FC to M4)
 
 
 	SERCOM3->USART.CTRLA.bit.DORD = 1;	//LSB first
 	SERCOM3->USART.CTRLA.bit.CMODE = 0;	//Async
 	SERCOM3->USART.CTRLA.bit.FORM = 0;	//USART frame
 	SERCOM3->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - PA23  (D13 - board)
-	SERCOM3->USART.CTRLA.bit.TXPO = 0;	//PAD[0] - PA22  (D12 - board)
+	SERCOM3->USART.CTRLA.bit.TXPO = 0;	//PAD[0] - PA22  (D12 - board) NC
 	SERCOM3->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
 	SERCOM3->USART.CTRLA.bit.MODE = 1;	//internal clk
 
@@ -423,7 +423,7 @@ uint8_t serial3_init()
 	return 0;
 }
 
-
+//not in use
 uint8_t serial4_init()
 {
 
