@@ -23,6 +23,18 @@ typedef struct {
 
 } aircraft_attitude;
 
+
+typedef struct {
+
+	int16_t latitude;
+	int16_t longitude;
+	int16_t altitude;
+} aircraft_error;
+
+extern aircraft_error gps_error;
+
+
+
 extern aircraft_ctrl fc_transmit;
 extern aircraft_attitude drone_attitude;
 

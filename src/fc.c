@@ -10,6 +10,7 @@
 #include "dma.h"
 #include "samd51j19a.h"
 
+
 //transmit flight control values to FC
  uint8_t transmit_data_fc[18];
 
@@ -35,7 +36,7 @@ uint16_t AUX2_buffer[2] = {0,0};
 
 aircraft_ctrl fc_transmit;
 aircraft_attitude drone_attitude;
-
+aircraft_error gps_error;
 
 
 
@@ -48,6 +49,8 @@ aircraft_ctrl fc_transmit = {
 		.AUX2 = 0x3E8,
 
 };
+
+
 
 
 uint16_t GPS_index = 0;
@@ -190,6 +193,15 @@ void DMAC_0_Handler(void)	//transfer complete
 
 		uint16_t AUX2 = (uint16_t) ((xbee_raw_receive[12] << 8) | (xbee_raw_receive[13] & 0xff));
 		fc_transmit.AUX2 = AUX2;
+
+		int16_t error_lat = (int16_t) ((xbee_raw_receive[14] << 8) | (xbee_raw_receive[15] & 0xff));
+		gps_error.latitude = error_lat;
+
+		int16_t error_long = (int16_t) ((xbee_raw_receive[14] << 8) | (xbee_raw_receive[15] & 0xff));
+		gps_error.longitude = error_long;
+
+		int16_t error_alt = (int16_t) ((xbee_raw_receive[14] << 8) | (xbee_raw_receive[15] & 0xff));
+		gps_error.altitude = error_alt;
 
 /*	} else {
 	for(int i = 0; i < 9; i++) {		//if no char match, clear array
