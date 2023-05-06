@@ -290,10 +290,10 @@ void DMAC_1_Handler(void)	//transfer complete
 		uart_transmit_xbee[0] = 0x42;
 		uart_transmit_xbee[1] = 0x43;
 		uart_transmit_xbee[2] = 0x44;
-		uart_transmit_xbee[3] = (uint8_t) (drone_attitude.pitch >> 8);
-		uart_transmit_xbee[4] = (uint8_t) (drone_attitude.pitch & 0xff);
-		uart_transmit_xbee[5] = (uint8_t) (drone_attitude.roll>> 8);
-		uart_transmit_xbee[6] = (uint8_t) (drone_attitude.roll & 0xff);
+		uart_transmit_xbee[3] = (uint8_t) (drone_attitude.roll >> 8);
+		uart_transmit_xbee[4] = (uint8_t) (drone_attitude.roll & 0xff);
+		uart_transmit_xbee[5] = (uint8_t) (drone_attitude.pitch >> 8);
+		uart_transmit_xbee[6] = (uint8_t) (drone_attitude.pitch & 0xff);
 		uart_transmit_xbee[7] = (uint8_t) (drone_attitude.heading >> 8);
 		uart_transmit_xbee[8] = (uint8_t) (drone_attitude.heading & 0xff);
 		uart_transmit_xbee[9] = (uint8_t) (drone_attitude.altitude >> 8);
@@ -326,6 +326,6 @@ void DMAC_1_Handler(void)	//transfer complete
 //}
 
 void nav_update_heading(void) {
-	fc_transmit_auto.yaw = PI_Controller_Heading(0.0, (double) drone_attitude.heading, heading_error);
+	fc_transmit_auto.yaw = PI_Controller_Heading(0.0, drone_attitude.heading, heading_error);
 
 }
