@@ -23,7 +23,7 @@
 
 
 //receive flight control values
- uint8_t xbee_raw_receive[15];
+ uint8_t xbee_raw_receive[21];
  uint8_t xbee_rx_sorted[14];
 
 //receive GPS RAW Data
@@ -35,6 +35,8 @@ uint16_t AUX1_buffer[2] = {0,0};
 uint16_t AUX2_buffer[2] = {0,0};
 
 aircraft_ctrl fc_transmit;
+aircraft_ctrl fc_transmit_auto;
+
 aircraft_attitude drone_attitude;
 aircraft_error gps_error;
 
@@ -123,35 +125,66 @@ void update_channel_values(void)
 {
 
 	TC2->COUNT32.INTFLAG.bit.MC1 = 1;
+	if(fc_transmit.AUX1 < 1900){
+		transmit_data_fc[0] = 0x0;	// missed frames [1]
+		transmit_data_fc[1] = 0x0; // missed frames [2]
 
-	transmit_data_fc[0] = 0x0;	// missed frames [1]
-	transmit_data_fc[1] = 0x0; // missed frames [2]
+		transmit_data_fc[2] = (uint8_t) ((0x8000U | (fc_transmit.throttle + 24U)) >> 8UL);	// channel 1	//throttle
+		transmit_data_fc[3] = ((uint8_t) (0x8000U | (fc_transmit.throttle + 24U))  & 0xFFUL);
 
-	transmit_data_fc[2] = (uint8_t) ((0x8000U | (fc_transmit.throttle + 24U)) >> 8UL);	// channel 1	//throttle
-	transmit_data_fc[3] = ((uint8_t) (0x8000U | (fc_transmit.throttle + 24U))  & 0xFFUL);
+		transmit_data_fc[4] = (uint8_t) ((0x800U | (fc_transmit.roll + 24U)) >> 8UL); // channel 2		//roll
+		transmit_data_fc[5] = ((uint8_t) (0x800U | (fc_transmit.roll + 24U)) & 0xFFUL);
 
-	transmit_data_fc[4] = (uint8_t) ((0x800U | (fc_transmit.roll + 24U)) >> 8UL); // channel 2		//roll
-	transmit_data_fc[5] = ((uint8_t) (0x800U | (fc_transmit.roll + 24U)) & 0xFFUL);
+		transmit_data_fc[6] = (uint8_t) ((0x1000U | (fc_transmit.pitch + 24U)) >> 8UL); // channel 3		//pitch
+		transmit_data_fc[7] = (uint8_t) (0x1000U | (fc_transmit.pitch + 24U));
 
-	transmit_data_fc[6] = (uint8_t) ((0x1000U | (fc_transmit.pitch + 24U)) >> 8UL); // channel 3		//pitch
-	transmit_data_fc[7] = (uint8_t) (0x1000U | (fc_transmit.pitch + 24U));
+		transmit_data_fc[8] = (uint8_t) ((0x1800U | (fc_transmit.yaw + 24U)) >> 8UL); // channel 4		//yaw
+		transmit_data_fc[9] = ((uint8_t) (0x1800U | (fc_transmit.yaw + 24U)) & 0xFFUL);
 
-	transmit_data_fc[8] = (uint8_t) ((0x1800U | (fc_transmit.yaw + 24U)) >> 8UL); // channel 4		//yaw
-	transmit_data_fc[9] = ((uint8_t) (0x1800U | (fc_transmit.yaw + 24U)) & 0xFFUL);
+		transmit_data_fc[10] = (uint8_t) ((0x2000U | (fc_transmit.AUX1 + 24U)) >> 8UL); // channel 5 AUX1
+		transmit_data_fc[11] = ((uint8_t) (0x2000U | (fc_transmit.AUX1 + 24U)) & 0xFFUL);
 
-	transmit_data_fc[10] = (uint8_t) ((0x2000U | (fc_transmit.AUX1 + 24U)) >> 8UL); // channel 5 AUX1
-	transmit_data_fc[11] = ((uint8_t) (0x2000U | (fc_transmit.AUX1 + 24U)) & 0xFFUL);
+		transmit_data_fc[12] = (uint8_t) ((0x2800U | (fc_transmit.AUX2 + 24U)) >> 8UL); // channel 6 AUX2
+		transmit_data_fc[13] = ((uint8_t) (0x2800U | (fc_transmit.AUX2 + 24U)) & 0xFFUL);
 
-	transmit_data_fc[12] = (uint8_t) ((0x2800U | (fc_transmit.AUX2 + 24U)) >> 8UL); // channel 6 AUX2
-	transmit_data_fc[13] = ((uint8_t) (0x2800U | (fc_transmit.AUX2 + 24U)) & 0xFFUL);
+		//knob?
+		transmit_data_fc[14] = (uint8_t) ((0x3000U | (0x00 + 24U)) >> 8UL); // AUX3
+		transmit_data_fc[15] = ((uint8_t) (0x3000U | (0x00 + 24U)) & 0xFFUL);
 
-	transmit_data_fc[14] = (uint8_t) ((0x3000U | (0x00 + 24U)) >> 8UL); // AUX3
-	transmit_data_fc[15] = ((uint8_t) (0x3000U | (0x00 + 24U)) & 0xFFUL);
+		transmit_data_fc[16] = 0xff;
+		transmit_data_fc[17] = 0xff;
+	}
 
 
-	transmit_data_fc[16] = 0xff;
-	transmit_data_fc[17] = 0xff;
+	if(fc_transmit.AUX1 > 1900){
+		transmit_data_fc[0] = 0x0;	// missed frames [1]
+		transmit_data_fc[1] = 0x0; // missed frames [2]
 
+		transmit_data_fc[2] = (uint8_t) ((0x8000U | (fc_transmit_auto.throttle + 24U)) >> 8UL);	// channel 1	//throttle
+		transmit_data_fc[3] = ((uint8_t) (0x8000U | (fc_transmit_auto.throttle + 24U))  & 0xFFUL);
+
+		transmit_data_fc[4] = (uint8_t) ((0x800U | (fc_transmit_auto.roll + 24U)) >> 8UL); // channel 2		//roll
+		transmit_data_fc[5] = ((uint8_t) (0x800U | (fc_transmit_auto.roll + 24U)) & 0xFFUL);
+
+		transmit_data_fc[6] = (uint8_t) ((0x1000U | (fc_transmit_auto.pitch + 24U)) >> 8UL); // channel 3		//pitch
+		transmit_data_fc[7] = (uint8_t) (0x1000U | (fc_transmit_auto.pitch + 24U));
+
+		transmit_data_fc[8] = (uint8_t) ((0x1800U | (fc_transmit_auto.yaw + 24U)) >> 8UL); // channel 4		//yaw
+		transmit_data_fc[9] = ((uint8_t) (0x1800U | (fc_transmit_auto.yaw + 24U)) & 0xFFUL);
+
+		transmit_data_fc[10] = (uint8_t) ((0x2000U | (fc_transmit_auto.AUX1 + 24U)) >> 8UL); // channel 5 AUX1
+		transmit_data_fc[11] = ((uint8_t) (0x2000U | (fc_transmit_auto.AUX1 + 24U)) & 0xFFUL);
+
+		transmit_data_fc[12] = (uint8_t) ((0x2800U | (fc_transmit_auto.AUX2 + 24U)) >> 8UL); // channel 6 AUX2
+		transmit_data_fc[13] = ((uint8_t) (0x2800U | (fc_transmit_auto.AUX2 + 24U)) & 0xFFUL);
+
+
+		transmit_data_fc[14] = (uint8_t) ((0x3000U | (0x00 + 24U)) >> 8UL); // AUX3
+		transmit_data_fc[15] = ((uint8_t) (0x3000U | (0x00 + 24U)) & 0xFFUL);
+
+		transmit_data_fc[16] = 0xff;
+		transmit_data_fc[17] = 0xff;
+	}
 
 }
 
@@ -175,7 +208,7 @@ void DMAC_0_Handler(void)	//transfer complete
 
 
 
-	if (xbee_raw_receive[0] == 0x42 && xbee_raw_receive[1] == 0x43 && xbee_raw_receive[14] == 0x43) {
+	if (xbee_raw_receive[0] == 0x42 && xbee_raw_receive[1] == 0x43 && xbee_raw_receive[20] == 0x43) {
 		uint16_t throttle = (uint16_t) ((xbee_raw_receive[2] << 8) | (xbee_raw_receive[3] & 0xff));
 		fc_transmit.throttle = throttle;
 
@@ -197,10 +230,10 @@ void DMAC_0_Handler(void)	//transfer complete
 		int16_t error_lat = (int16_t) ((xbee_raw_receive[14] << 8) | (xbee_raw_receive[15] & 0xff));
 		gps_error.latitude = error_lat;
 
-		int16_t error_long = (int16_t) ((xbee_raw_receive[14] << 8) | (xbee_raw_receive[15] & 0xff));
+		int16_t error_long = (int16_t) ((xbee_raw_receive[16] << 8) | (xbee_raw_receive[17] & 0xff));
 		gps_error.longitude = error_long;
 
-		int16_t error_alt = (int16_t) ((xbee_raw_receive[14] << 8) | (xbee_raw_receive[15] & 0xff));
+		int16_t error_alt = (int16_t) ((xbee_raw_receive[18] << 8) | (xbee_raw_receive[19] & 0xff));
 		gps_error.altitude = error_alt;
 
 /*	} else {
@@ -270,8 +303,9 @@ void DMAC_1_Handler(void)	//transfer complete
 		SERCOM3->USART.INTENSET.bit.RXC = 1;
 
 
+}
+void nav_update(void){
 
 }
-
 
 

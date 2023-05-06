@@ -36,6 +36,7 @@ extern aircraft_error gps_error;
 
 
 extern aircraft_ctrl fc_transmit;
+extern aircraft_ctrl fc_transmit_auto;
 extern aircraft_attitude drone_attitude;
 
 
@@ -55,7 +56,7 @@ extern uint8_t uart_transmit_xbee[12];
 
 
 //receive flight control values
-extern uint8_t xbee_raw_receive[15];
+extern uint8_t xbee_raw_receive[21];
 extern uint8_t xbee_rx_sorted[14];
 
 //receive GPS RAW Data
