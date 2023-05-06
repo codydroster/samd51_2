@@ -44,7 +44,7 @@ aircraft_attitude drone_attitude;
 aircraft_error gps_error;
 
 
-
+// 0-2000
 aircraft_ctrl fc_transmit = {
 		.throttle = 0x3e7,
 		.roll = 0x3E8,

@@ -8,12 +8,12 @@ uint16_t PI_Controller_Heading(double setpoint, double actual, double *integral_
     // PI calculation
     double output = KP * error + KI * (*integral_error);
 
-    // Output saturation
-    if (output < OUTPUT_MIN) {
-        output = OUTPUT_MIN;
-    } else if (output > OUTPUT_MAX) {
-        output = OUTPUT_MAX;
-    }
+//    // Output saturation
+//    if (output < OUTPUT_MIN) {
+//        output = OUTPUT_MIN;
+//    } else if (output > OUTPUT_MAX) {
+//        output = OUTPUT_MAX;
 
-    return output;
+
+    return output + 1000;
 }
