@@ -67,7 +67,7 @@ uint8_t TC0_init()
 	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 1;
 	TC0->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC0->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x249F00;//0x80E80;//0xdfffffff;
+	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x90E00;//0x80E80;//0xdfffffff; 0x249F00
 
 	TC0->COUNT32.INTENSET.bit.OVF = 1;
 
@@ -203,8 +203,7 @@ uint8_t serial0_init()
 	SERCOM0->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
 	SERCOM0->USART.CTRLA.bit.MODE = 1;	//internal clk
 
-	//interupt enable
-	SERCOM0->USART.INTENSET.bit.RXC = 1;
+
 
 
 	SERCOM0->USART.CTRLB.bit.RXEN = 1;	//RX enable
@@ -226,6 +225,9 @@ uint8_t serial0_init()
 	PORT->Group[0].DIRCLR.bit.DIRCLR = 1;
 	PORT->Group[0].CTRL.reg |= (1 << 5);
 
+	//interupt enable
+	SERCOM0->USART.INTENSET.bit.RXC = 1;
+	NVIC_EnableIRQ(SERCOM0_2_IRQn);
 
 	//6MHZ clk configured
 	SERCOM0->USART.BAUD.reg = 60503;	//230400 baud (63019:115200)
@@ -258,7 +260,7 @@ uint8_t serial1_init()
 	SERCOM1->USART.CTRLA.bit.DORD = 1;	//LSB first ?????
 	SERCOM1->USART.CTRLA.bit.CMODE = 0;	//Async
 	SERCOM1->USART.CTRLA.bit.FORM = 0;	//USART frame
-	SERCOM1->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - A17 (SCK - board) //NC
+	SERCOM1->USART.CTRLA.bit.RXPO = 1;	//PAD[1] - A17 (SCK - board) NC
 	SERCOM1->USART.CTRLA.bit.TXPO = 0;	//PAD[0] - A16 (D5 - board)
 	SERCOM1->USART.CTRLA.bit.SAMPR = 0;	//16x oversampling
 	SERCOM1->USART.CTRLA.bit.MODE = 1;	//internal clk
@@ -366,18 +368,13 @@ uint8_t serial2_init()
 
 uint8_t serial3_init()
 {
-
-
 	//clk setup
 	MCLK->APBBMASK.bit.SERCOM3_ = 1;
 
 	GCLK->PCHCTRL[24].bit.GEN = 0;	//SERCOM3 clk gen 0
 	GCLK->PCHCTRL[24].bit.CHEN = 1;	//enable SERCOM3
 
-
-
 	//SERCOM init FC RX (FC to M4)
-
 
 	SERCOM3->USART.CTRLA.bit.DORD = 1;	//LSB first
 	SERCOM3->USART.CTRLA.bit.CMODE = 0;	//Async
@@ -409,6 +406,8 @@ uint8_t serial3_init()
 	PORT->Group[0].DIRCLR.bit.DIRCLR = 23;
 	PORT->Group[0].CTRL.bit.SAMPLING = 23;
 
+	SERCOM3->USART.INTENSET.bit.RXC = 1;
+	NVIC_EnableIRQ(SERCOM3_2_IRQn);
 
 
 

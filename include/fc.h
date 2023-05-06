@@ -35,7 +35,7 @@ void update_channel_values();
 extern uint8_t transmit_data_fc[18];
 
 //receive attitude
-extern uint8_t receive_data_fc[10];
+extern uint8_t receive_data_fc[12];
 
 
 //transmit attitude, raw GPS to base station.
@@ -43,7 +43,7 @@ extern uint8_t uart_transmit_xbee[12];
 
 
 //receive flight control values
-extern uint8_t xbee_raw_receive[14];
+extern uint8_t xbee_raw_receive[15];
 extern uint8_t xbee_rx_sorted[14];
 
 //receive GPS RAW Data
