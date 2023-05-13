@@ -29,7 +29,7 @@ uint8_t init()
 	while(!MCLK->INTFLAG.bit.CKRDY);
 
 //	osc_init();
-//	clk_output();
+	clk_output();
 	gen1_init();
 	gen2_init();
 
@@ -43,6 +43,7 @@ uint8_t init()
 	dmac_init();
 	TC0_init();
 	TC2_init();
+	TC4_init();
 
 
 
@@ -65,15 +66,14 @@ uint8_t TC0_init()
 	GCLK->PCHCTRL[9].bit.CHEN = 1;
 	TC0->COUNT32.CTRLA.bit.MODE = 2;
 	TC1->COUNT32.CTRLA.bit.MODE = 2;
-	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 1;
+
+	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC0->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC0->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
 	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x90E00;//0x80E80;//0xdfffffff; 0x249F00
 
 	TC0->COUNT32.INTENSET.bit.OVF = 1;
 
-	TC1->COUNT16.CTRLA.bit.ENABLE = 1;
-	while(TC1->COUNT16.SYNCBUSY.bit.ENABLE);
 
 	TC0->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC0->COUNT32.SYNCBUSY.bit.ENABLE);
@@ -98,12 +98,11 @@ uint8_t TC2_init()
 	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
 	GCLK->PCHCTRL[26].bit.CHEN = 1;
 	TC2->COUNT32.CTRLA.bit.MODE = 2;
-//	TC3->COUNT32.CTRLA.bit.MODE = 2;
 	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 0;	//???
 	TC2->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC2->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
 
-	//95uS
+
 	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0x4000;//0x1D4C00;//0x80E80;//0xdfffffff;
 
 	TC2->COUNT32.INTENSET.bit.OVF = 1;
@@ -122,24 +121,30 @@ uint8_t TC4_init()
 	MCLK->APBCMASK.bit.TC4_ = 1;
 	MCLK->APBCMASK.bit.TC5_ = 1;
 
-	GCLK->PCHCTRL[9].bit.GEN = 2;	//100Khz source
+	GCLK->PCHCTRL[30].bit.GEN = 2;	//100Khz source
 
-	while(TC0->COUNT32.SYNCBUSY.bit.STATUS);
-	GCLK->PCHCTRL[9].bit.CHEN = 1;
+
+
+	while(GCLK->SYNCBUSY.bit.GENCTRL2);
+	GCLK->PCHCTRL[30].bit.CHEN = 1;
+
 	TC4->COUNT32.CTRLA.bit.MODE = 2;
 	TC5->COUNT32.CTRLA.bit.MODE = 2;
+
 	TC4->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC4->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC4->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC4->COUNT32.CCBUF[0].reg = (uint32_t) 0x30D40;	//2 seconds
+	while(TC4->COUNT32.SYNCBUSY.bit.CC0);
+	TC4->COUNT32.CCBUF[0].reg = (uint32_t) 0x30D40;	//1 seconds
 
-	TC4->COUNT32.INTENSET.bit.OVF = 1;
 
-	TC5->COUNT16.CTRLA.bit.ENABLE = 1;
-	while(TC5->COUNT16.SYNCBUSY.bit.ENABLE);
+	TC4->COUNT32.INTENSET.bit.MC0 = 1;
 
 	TC4->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC4->COUNT32.SYNCBUSY.bit.ENABLE);
+
+
+
 
 
 
@@ -155,11 +160,17 @@ return 0;
 
 uint8_t clk_output()
 {
+	//gclk[2]
+	GCLK->GENCTRL[2].bit.OE |= 1;
+	PORT->Group[1].PINCFG[16].bit.PMUXEN |= 1;
+	PORT->Group[1].PMUX[8].bit.PMUXE = 0xC;
+	PORT->Group[1].PINCFG[16].bit.DRVSTR = 1;
 
-	GCLK->GENCTRL[0].bit.OE |= 1;
-	PORT->Group[0].PINCFG[14].bit.PMUXEN |= 1;
-	PORT->Group[0].PMUX[7].bit.PMUXE = 0xC;
-	PORT->Group[0].PINCFG[14].bit.DRVSTR = 1;
+	//gclk[0]
+//	GCLK->GENCTRL[0].bit.OE |= 1;
+//	PORT->Group[0].PINCFG[14].bit.PMUXEN |= 1;
+//	PORT->Group[0].PMUX[7].bit.PMUXE = 0xC;
+//	PORT->Group[0].PINCFG[14].bit.DRVSTR = 1;
 
 return 0;
 
@@ -213,7 +224,7 @@ uint8_t gen1_init()
 uint8_t gen2_init()
 {
 	GCLK->GENCTRL[2].bit.GENEN = 1;
-	GCLK->GENCTRL[2].bit.DIV = 480;	//100Khz
+	GCLK->GENCTRL[2].bit.DIV = 495;	//200Khz
 	GCLK->GENCTRL[2].bit.IDC = 1;
 	GCLK->GENCTRL[2].bit.SRC |= 6;
 

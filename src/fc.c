@@ -105,7 +105,8 @@ void TC4_Handler(void)
 {
 
 
-	TC2->COUNT32.INTFLAG.bit.OVF = 1;
+	TC4->COUNT32.INTFLAG.bit.MC0 = 1;
+
 }
 
 //receive complete
