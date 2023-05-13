@@ -62,6 +62,8 @@ aircraft_ctrl fc_transmit = {
 uint16_t GPS_index = 0;
 
 double *heading_error = 0;
+double *roll_error = 0;
+double *pitch_error = 0;
 
 
 
@@ -169,11 +171,11 @@ void update_channel_values(void)
 		transmit_data_fc[2] = (uint8_t) ((0x8000U | (fc_transmit.throttle + 24U)) >> 8UL);	// channel 1	//throttle
 		transmit_data_fc[3] = ((uint8_t) (0x8000U | (fc_transmit.throttle + 24U))  & 0xFFUL);
 
-		transmit_data_fc[4] = (uint8_t) ((0x800U | (fc_transmit.roll + 24U)) >> 8UL); // channel 2		//roll
-		transmit_data_fc[5] = ((uint8_t) (0x800U | (fc_transmit.roll + 24U)) & 0xFFUL);
+		transmit_data_fc[4] = (uint8_t) ((0x800U | (fc_transmit_auto.roll + 24U)) >> 8UL); // channel 2		//roll
+		transmit_data_fc[5] = ((uint8_t) (0x800U | (fc_transmit_auto.roll + 24U)) & 0xFFUL);
 
-		transmit_data_fc[6] = (uint8_t) ((0x1000U | (fc_transmit.pitch + 24U)) >> 8UL); // channel 3		//pitch
-		transmit_data_fc[7] = (uint8_t) (0x1000U | (fc_transmit.pitch + 24U));
+		transmit_data_fc[6] = (uint8_t) ((0x1000U | (fc_transmit_auto.pitch + 24U)) >> 8UL); // channel 3		//pitch
+		transmit_data_fc[7] = (uint8_t) (0x1000U | (fc_transmit_auto.pitch + 24U));
 
 		transmit_data_fc[8] = (uint8_t) ((0x1800U | (fc_transmit_auto.yaw + 24U)) >> 8UL); // channel 4		//yaw
 		transmit_data_fc[9] = ((uint8_t) (0x1800U | (fc_transmit_auto.yaw + 24U)) & 0xFFUL);
@@ -325,7 +327,10 @@ void DMAC_1_Handler(void)	//transfer complete
 //	fc_transmit_auto.yaw = (uint16_t) (1000.00 - ((float) heading * kP));
 //}
 
-void nav_update_heading(void) {
+void nav_update_autonomous(void) {
 	fc_transmit_auto.yaw = PI_Controller_Heading(0.0, drone_attitude.heading, heading_error);
+	fc_transmit_auto.roll = PI_Controller_Roll(0.0, gps_error.longitude, roll_error);
+	fc_transmit_auto.pitch = PI_Controller_Roll(0.0, gps_error.latitude, pitch_error);
 
 }
+

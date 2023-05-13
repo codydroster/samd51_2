@@ -45,7 +45,7 @@ extern aircraft_attitude drone_attitude;
 
 
 void update_channel_values();
-
+void nav_update_autonomous();
 
 //transmit flight control values to FC
 extern uint8_t transmit_data_fc[18];

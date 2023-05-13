@@ -47,7 +47,7 @@ int main()
 
 	while(1) {
 		update_channel_values();
-		nav_update_heading();
+		nav_update_autonomous();
 
 
 
