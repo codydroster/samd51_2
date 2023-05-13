@@ -12,6 +12,8 @@ uint8_t osc32_init();
 
 uint8_t gen1_init();
 
+uint8_t gen2_init();
+
 uint8_t osc_init();
 
 uint8_t led_init();

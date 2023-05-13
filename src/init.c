@@ -31,6 +31,7 @@ uint8_t init()
 //	osc_init();
 //	clk_output();
 	gen1_init();
+	gen2_init();
 
 
 
@@ -110,10 +111,40 @@ uint8_t TC2_init()
 	TC2->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
 
-
-
-
 //	NVIC_EnableIRQ(TC2_IRQn);	//overflow interrupt
+
+return 0;
+
+}
+
+uint8_t TC4_init()
+{
+	MCLK->APBCMASK.bit.TC4_ = 1;
+	MCLK->APBCMASK.bit.TC5_ = 1;
+
+	GCLK->PCHCTRL[9].bit.GEN = 2;	//100Khz source
+
+	while(TC0->COUNT32.SYNCBUSY.bit.STATUS);
+	GCLK->PCHCTRL[9].bit.CHEN = 1;
+	TC4->COUNT32.CTRLA.bit.MODE = 2;
+	TC5->COUNT32.CTRLA.bit.MODE = 2;
+	TC4->COUNT32.CTRLA.bit.CAPTEN0 = 0;
+	TC4->COUNT32.CTRLBSET.bit.DIR = 0;
+	TC4->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
+	TC4->COUNT32.CCBUF[0].reg = (uint32_t) 0x30D40;	//2 seconds
+
+	TC4->COUNT32.INTENSET.bit.OVF = 1;
+
+	TC5->COUNT16.CTRLA.bit.ENABLE = 1;
+	while(TC5->COUNT16.SYNCBUSY.bit.ENABLE);
+
+	TC4->COUNT32.CTRLA.bit.ENABLE = 1;
+	while(TC4->COUNT32.SYNCBUSY.bit.ENABLE);
+
+
+
+
+	NVIC_EnableIRQ(TC4_IRQn);	//overflow interrupt
 
 return 0;
 
@@ -156,7 +187,7 @@ uint8_t osc_init()
 
 uint8_t gen1_init()
 {
-	//112MHZ clock source
+	//48MHZ clock source
 
 	GCLK->GENCTRL[1].bit.GENEN = 1;
 	GCLK->GENCTRL[1].bit.DIV = 6;	//8Mhz
@@ -175,6 +206,18 @@ uint8_t gen1_init()
 	while(GCLK->SYNCBUSY.bit.GENCTRL1);
 
 
+
+	return 0;
+}
+
+uint8_t gen2_init()
+{
+	GCLK->GENCTRL[2].bit.GENEN = 1;
+	GCLK->GENCTRL[2].bit.DIV = 480;	//100Khz
+	GCLK->GENCTRL[2].bit.IDC = 1;
+	GCLK->GENCTRL[2].bit.SRC |= 6;
+
+	while(GCLK->SYNCBUSY.bit.GENCTRL2);
 
 	return 0;
 }

@@ -101,6 +101,13 @@ void TC2_Handler(void)
 
 }
 
+void TC4_Handler(void)
+{
+
+
+	TC2->COUNT32.INTFLAG.bit.OVF = 1;
+}
+
 //receive complete
 void SERCOM2_2_Handler(void)
 {
