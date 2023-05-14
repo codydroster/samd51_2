@@ -71,7 +71,7 @@ double *pitch_error = 0;
 void TC0_Handler(void)
 {
 
-	TC0->COUNT32.INTFLAG.bit.OVF = 1;
+	TC0->COUNT32.INTFLAG.bit.MC0 = 1;
 
 	//DMAC->Channel[1].CHINTFLAG.bit.SUSP = 1;
 //	DMAC->Channel[1].CHINTFLAG.bit.TCMPL = 1;
@@ -96,13 +96,15 @@ void TC2_Handler(void)
 		while(!(SERCOM0->USART.INTFLAG.bit.TXC));
 	}
 
-	TC2->COUNT32.INTFLAG.bit.OVF = 1;
+	TC2->COUNT32.INTFLAG.bit.MC0 = 1;
 	NVIC_DisableIRQ(TC2_IRQn);
 
 }
 
 void TC4_Handler(void)
 {
+
+
 
 
 	TC4->COUNT32.INTFLAG.bit.MC0 = 1;

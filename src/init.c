@@ -70,9 +70,9 @@ uint8_t TC0_init()
 	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC0->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC0->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x90E00;//0x80E80;//0xdfffffff; 0x249F00
+	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0xFFFFFF;//0x80E80;//0xdfffffff; 0x249F00
 
-	TC0->COUNT32.INTENSET.bit.OVF = 1;
+	TC0->COUNT32.INTENSET.bit.MC0 = 1;
 
 
 	TC0->COUNT32.CTRLA.bit.ENABLE = 1;
@@ -98,19 +98,20 @@ uint8_t TC2_init()
 	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
 	GCLK->PCHCTRL[26].bit.CHEN = 1;
 	TC2->COUNT32.CTRLA.bit.MODE = 2;
-	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 0;	//???
+	TC3->COUNT32.CTRLA.bit.MODE = 2;
+	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC2->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC2->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
 
 
-	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0x4000;//0x1D4C00;//0x80E80;//0xdfffffff;
+	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0xFFFFF;//0x1D4C00;//0x80E80;//0xdfffffff;
 
-	TC2->COUNT32.INTENSET.bit.OVF = 1;
+	TC2->COUNT32.INTENSET.bit.MC0 = 1;
 
 	TC2->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
 
-//	NVIC_EnableIRQ(TC2_IRQn);	//overflow interrupt
+//	NVIC_EnableIRQ(TC2_IRQn);	//match interrupt
 
 return 0;
 
@@ -121,7 +122,7 @@ uint8_t TC4_init()
 	MCLK->APBCMASK.bit.TC4_ = 1;
 	MCLK->APBCMASK.bit.TC5_ = 1;
 
-	GCLK->PCHCTRL[30].bit.GEN = 2;	//100Khz source
+	GCLK->PCHCTRL[30].bit.GEN = 2;	//200Khz source
 
 
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define KP_Heading 0.15 // Proportional gain - Heading
 #define KI_Heading 0.01 // Integral gain - Heading
