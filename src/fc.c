@@ -129,8 +129,6 @@ void TC4_Handler(void)
 {
 
 
-
-
 	TC4->COUNT32.INTFLAG.bit.MC0 = 1;
 
 }
