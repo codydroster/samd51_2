@@ -22,7 +22,7 @@ uint16_t PI_Controller_Pitch(double setpoint, int16_t actual, double *integral_e
     *integral_error += error;
 
     // PI calculation
-    double output = KP_Pitch * error + KI_Heading * (*integral_error);
+    double output = KP_Pitch * error + KI_Pitch * (*integral_error);
 
     return output + 1000;
 }
@@ -34,7 +34,7 @@ uint16_t PI_Controller_Roll(double setpoint, int16_t actual, double *integral_er
     *integral_error += error;
 
     // PI calculation
-    double output = KP_Roll * error + KI_Heading * (*integral_error);
+    double output = KP_Roll * error + KI_Roll * (*integral_error);
 
     return output + 1000;
 }
