@@ -43,6 +43,7 @@ uint8_t init()
 	dmac_init();
 	TC0_init();
 	TC2_init();
+	TC3_init();
 	TC4_init();
 
 
@@ -60,7 +61,7 @@ uint8_t TC0_init()
 	MCLK->APBAMASK.bit.TC0_ = 1;
 	MCLK->APBAMASK.bit.TC1_ = 1;
 
-	GCLK->PCHCTRL[9].bit.GEN = 0;	//48Mhz source
+	GCLK->PCHCTRL[9].bit.GEN = 2;	//200khz
 
 	while(TC0->COUNT32.SYNCBUSY.bit.STATUS);
 	GCLK->PCHCTRL[9].bit.CHEN = 1;
@@ -70,7 +71,7 @@ uint8_t TC0_init()
 	TC0->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC0->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC0->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
-	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0xFFFFFF;//0x80E80;//0xdfffffff; 0x249F00
+	TC0->COUNT32.CCBUF[0].reg = (uint32_t) 0x888;//0x80E80;//0xdfffffff; 0x249F00
 
 	TC0->COUNT32.INTENSET.bit.MC0 = 1;
 
@@ -91,24 +92,50 @@ return 0;
 uint8_t TC2_init()
 {
 	MCLK->APBBMASK.bit.TC2_ = 1;
-	MCLK->APBBMASK.bit.TC3_ = 1;
 
-	GCLK->PCHCTRL[26].bit.GEN = 0;	//48Mhz source
+	GCLK->PCHCTRL[26].bit.GEN = 2;	//200KHz source
 
 	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
 	GCLK->PCHCTRL[26].bit.CHEN = 1;
-	TC2->COUNT32.CTRLA.bit.MODE = 2;
-	TC3->COUNT32.CTRLA.bit.MODE = 2;
+	TC2->COUNT32.CTRLA.bit.MODE = 0;
 	TC2->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC2->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC2->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
 
 
-	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0xFFFFF;//0x1D4C00;//0x80E80;//0xdfffffff;
+	TC2->COUNT32.CCBUF[0].reg = (uint32_t) 0xff;//0x1D4C00;//0x80E80;//0xdfffffff;
 
 	TC2->COUNT32.INTENSET.bit.MC0 = 1;
 
 	TC2->COUNT32.CTRLA.bit.ENABLE = 1;
+	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
+
+
+return 0;
+
+}
+
+//100Hz PID
+uint8_t TC3_init()
+{
+	MCLK->APBBMASK.bit.TC3_ = 1;
+
+	GCLK->PCHCTRL[26].bit.GEN = 2;	//200KHz source
+
+	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
+	GCLK->PCHCTRL[26].bit.CHEN = 1;
+
+	TC3->COUNT32.CTRLA.bit.MODE = 2;
+	TC3->COUNT32.CTRLA.bit.CAPTEN0 = 0;
+	TC3->COUNT32.CTRLBSET.bit.DIR = 0;
+	TC3->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
+
+
+	TC3->COUNT32.CCBUF[0].reg = (uint32_t) 0x7D0;//0x1D4C00;//0x80E80;//0xdfffffff;
+
+	TC3->COUNT32.INTENSET.bit.MC0 = 1;
+
+	TC3->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
 
 //	NVIC_EnableIRQ(TC2_IRQn);	//match interrupt

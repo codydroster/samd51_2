@@ -26,6 +26,7 @@ uint8_t dmac_desc0_init();
 
 uint8_t TC0_init();
 uint8_t TC2_init();
+uint8_t TC3_init();
 uint8_t TC4_init();
 
 uint8_t serial0_init();

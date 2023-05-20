@@ -101,6 +101,17 @@ void TC2_Handler(void)
 
 }
 
+void TC3_Handler(void)
+{
+
+	nav_update_autonomous();
+
+	TC3->COUNT32.INTFLAG.bit.MC0 = 1;
+
+
+}
+
+
 void TC4_Handler(void)
 {
 
@@ -122,11 +133,11 @@ void SERCOM2_2_Handler(void)
 	//if TC2 interrupt is disabled.
 	if (!(NVIC->ISER[(uint32_t)((int32_t)TC2_IRQn) >> 5] & (uint32_t)(1 << ((uint32_t)((int32_t)TC2_IRQn) & (uint32_t)0x1F)))) {
 
-		TC2->COUNT32.INTENSET.bit.OVF = 1;
-		TC2->COUNT32.INTFLAG.bit.OVF = 0xff;
+		TC2->COUNT32.INTENSET.bit.MC0 = 1;
+		TC2->COUNT32.INTFLAG.bit.MC0 = 0xff;
 
 		NVIC_ClearPendingIRQ(TC2_IRQn);
-//		NVIC_EnableIRQ(TC2_IRQn);
+		NVIC_EnableIRQ(TC2_IRQn);
 
 	}
 //	}
