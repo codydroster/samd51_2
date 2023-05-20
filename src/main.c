@@ -47,8 +47,9 @@ int main()
 
 	while(1) {
 		update_channel_values();
-		nav_update_autonomous();
 
+		//sample pin
+//		PORT->Group[0].OUT.reg = (0 << 21);
 
 
 

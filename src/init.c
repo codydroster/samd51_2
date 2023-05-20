@@ -43,10 +43,21 @@ uint8_t init()
 	TC4_init();
 
 
+	//sample pin
+//	sample_pin();
 
 
 
 return 0;
+
+}
+
+uint8_t sample_pin()
+{
+	PORT->Group[0].DIRSET.bit.DIRSET = 21;
+	PORT->Group[0].PINCFG[21].bit.DRVSTR = 1;
+	PORT->Group[0].PINCFG[21].bit.PULLEN = 1;
+	PORT->Group[0].PINCFG[21].bit.PMUXEN = 0;
 
 }
 
@@ -121,7 +132,7 @@ uint8_t TC3_init()
 	while(TC2->COUNT32.SYNCBUSY.bit.STATUS);
 	GCLK->PCHCTRL[26].bit.CHEN = 1;
 
-	TC3->COUNT32.CTRLA.bit.MODE = 2;
+	TC3->COUNT32.CTRLA.bit.MODE = 0;
 	TC3->COUNT32.CTRLA.bit.CAPTEN0 = 0;
 	TC3->COUNT32.CTRLBSET.bit.DIR = 0;
 	TC3->COUNT32.WAVE.bit.WAVEGEN = 1;	//TOP = CC0
@@ -134,7 +145,7 @@ uint8_t TC3_init()
 	TC3->COUNT32.CTRLA.bit.ENABLE = 1;
 	while(TC2->COUNT32.SYNCBUSY.bit.ENABLE);
 
-//	NVIC_EnableIRQ(TC2_IRQn);	//match interrupt
+	NVIC_EnableIRQ(TC3_IRQn);	//match interrupt
 
 return 0;
 

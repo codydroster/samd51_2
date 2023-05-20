@@ -24,6 +24,8 @@ uint8_t dmac_init();
 
 uint8_t dmac_desc0_init();
 
+uint8_t sample_pin();
+
 uint8_t TC0_init();
 uint8_t TC2_init();
 uint8_t TC3_init();

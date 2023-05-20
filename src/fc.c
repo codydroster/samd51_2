@@ -61,9 +61,17 @@ aircraft_ctrl fc_transmit = {
 
 uint16_t GPS_index = 0;
 
-double *heading_error = 0;
-double *roll_error = 0;
-double *pitch_error = 0;
+double heading_error_value = 0;
+double *heading_error = &heading_error_value;
+
+double roll_error_value = 0;
+double *roll_error = &roll_error_value;
+
+double pitch_error_value = 0;
+double *pitch_error = &pitch_error_value;
+
+double alt_error_value = 0;
+double *alt_error = &alt_error_value;
 
 
 
@@ -105,6 +113,11 @@ void TC3_Handler(void)
 {
 
 	nav_update_autonomous();
+
+//	PORT->Group[0].OUT.reg = (1 << 21);
+
+
+
 
 	TC3->COUNT32.INTFLAG.bit.MC0 = 1;
 
@@ -337,21 +350,12 @@ void DMAC_1_Handler(void)	//transfer complete
 
 
 }
-//void nav_update_heading(void){
-//	int16_t heading = (int16_t) drone_attitude.heading;
-//	if(drone_attitude.heading > 1800){
-//		heading = drone_attitude.heading - 3600;
-//	}
-//	float kP = .2;
-//	uint8_t setPoint = 0;
-//
-//	fc_transmit_auto.yaw = (uint16_t) (1000.00 - ((float) heading * kP));
-//}
 
 void nav_update_autonomous(void) {
 	fc_transmit_auto.yaw = PI_Controller_Heading(0.0, drone_attitude.heading, heading_error);
 	fc_transmit_auto.roll = PI_Controller_Roll(0.0, gps_error.longitude, roll_error);
-	fc_transmit_auto.pitch = PI_Controller_Roll(0.0, gps_error.latitude, pitch_error);
+	fc_transmit_auto.pitch = PI_Controller_Pitch(0.0, gps_error.latitude, pitch_error);
+	fc_transmit_auto.throttle = PI_Controller_Alt(0.0, gps_error.altitude, alt_error);
 
 }
 

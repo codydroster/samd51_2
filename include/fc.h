@@ -37,7 +37,6 @@ extern aircraft_error gps_error;
 
 
 
-
 extern aircraft_ctrl fc_transmit;
 extern aircraft_ctrl fc_transmit_auto;
 extern aircraft_attitude drone_attitude;
