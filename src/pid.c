@@ -9,16 +9,16 @@ uint16_t PI_Controller_Heading(double setpoint, int16_t actual, double *integral
 	if(actual_neg > 1800){
 		actual_neg = actual_neg - 3600.0;
 	}
+
     double error = setpoint - actual_neg;
-    if((error < 500.0) && (error > -500.0)) {
-    	*integral_error += error * KI_Heading;
-    }
+
+   	*integral_error += error * KI_Heading;
 
     if(*integral_error > 200.0) {
- 	*integral_error = 200.0;
+    	*integral_error = 200.0;
     }
     if(*integral_error < -200.0){
- 	*integral_error  = -200.0;
+    	*integral_error  = -200.0;
     }
 
     // PI calculation
@@ -30,11 +30,10 @@ uint16_t PI_Controller_Heading(double setpoint, int16_t actual, double *integral
 
 uint16_t PI_Controller_Pitch(double setpoint, int16_t actual, double *integral_error, double *heading_error) {
 
-	if(abs(*heading_error) < 10.0){
+	if(fabs(*heading_error) < 10.0) {
 		double error = setpoint - actual;
-		if((error < 500.0) && (error > -500.0)) {
+
 		*integral_error += error * (KI_Pitch);
-		}
 
 		if(*integral_error > 300.0) {
 			*integral_error = 300.0;
@@ -54,11 +53,10 @@ uint16_t PI_Controller_Pitch(double setpoint, int16_t actual, double *integral_e
 }
 
 uint16_t PI_Controller_Roll(double setpoint, int16_t actual, double *integral_error, double *heading_error) {
-	if(abs(*heading_error) < 10.0){
+	if(fabs(*heading_error) < 10.0){
 		double error = setpoint - actual;
-		if((error < 500.0) && (error > -500.0)) {
-		*integral_error += (error * KI_Roll);
-		}
+
+		*integral_error += error * (KI_Roll);
 
 		if(*integral_error > 300.0) {
 			*integral_error = 300.0;
