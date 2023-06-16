@@ -59,6 +59,8 @@ uint8_t sample_pin()
 	PORT->Group[0].PINCFG[21].bit.PULLEN = 1;
 	PORT->Group[0].PINCFG[21].bit.PMUXEN = 0;
 
+	return 0;
+
 }
 
 
@@ -303,7 +305,7 @@ uint8_t serial0_init()
 	while(SERCOM0->USART.SYNCBUSY.bit.CTRLB);
 
 
-	//pin setup
+	//pin setup	heading_err = *integral_error;
 	PORT->Group[0].PMUX[2].bit.PMUXE = 3;
 	PORT->Group[0].PMUX[2].bit.PMUXO = 3;
 	PORT->Group[0].PINCFG[4].bit.DRVSTR = 1;

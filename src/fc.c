@@ -350,9 +350,10 @@ void DMAC_1_Handler(void)	//transfer complete
 }
 
 void nav_update_autonomous(void) {
-	fc_transmit_auto.yaw = PI_Controller_Heading(0.0, drone_attitude.heading, heading_error);
-	fc_transmit_auto.roll = PI_Controller_Roll(0.0, gps_error.longitude, roll_error);
-	fc_transmit_auto.pitch = PI_Controller_Pitch(0.0, gps_error.latitude, pitch_error);
+	fc_transmit_auto.yaw = PI_Controller_Heading(1800.0, drone_attitude.heading, heading_error);
+	fc_transmit_auto.pitch = -PI_Controller_Pitch(0.0, gps_error.latitude, pitch_error, heading_error);
+	fc_transmit_auto.roll = -PI_Controller_Roll(0.0, gps_error.longitude, roll_error, heading_error);
+
 	fc_transmit_auto.throttle = PI_Controller_Alt(0.0, gps_error.altitude, alt_error);
 
 }
